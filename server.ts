@@ -5,8 +5,18 @@ import { createServer as createViteServer } from 'vite';
 import apiRoutes from './server/api';
 import { initDb } from './server/db';
 
+console.log('--- SERVER STARTING ---');
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION at:', promise, 'reason:', reason);
+});
+
 async function startServer() {
+  console.log('Initializing database...');
   await initDb();
+  console.log('Database initialized.');
   
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
