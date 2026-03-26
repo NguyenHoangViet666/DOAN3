@@ -13,10 +13,6 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 async function startServer() {
-  console.log('Initializing database...');
-  await initDb();
-  console.log('Database initialized.');
-  
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
@@ -50,6 +46,14 @@ async function startServer() {
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    
+    // Initialize database AFTER server is listening
+    console.log('Initializing database in background...');
+    initDb().then(() => {
+      console.log('Database initialized successfully.');
+    }).catch(err => {
+      console.error('Database initialization failed:', err);
+    });
   });
 }
 
