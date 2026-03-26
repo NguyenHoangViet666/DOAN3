@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import apiRoutes from './server/api';
-import { initDb } from './server/db';
+import { initDb, pool } from './server/db';
 
 console.log('--- SERVER STARTING ---');
 process.on('uncaughtException', (err) => {
@@ -20,12 +20,35 @@ async function startServer() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+  // Request logger for debugging
+  app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    if (req.method === 'POST') console.log('Body:', JSON.stringify(req.body));
+    next();
+  });
+
   // API Routes
   app.use('/api', apiRoutes);
 
-  // Health check
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok' });
+  // Detailed Health check
+  app.get('/api/health', async (req, res) => {
+    try {
+      // Simple query to check DB connection
+      const [result] = await pool.query('SELECT 1 as connected');
+      res.json({ 
+        status: 'ok', 
+        message: 'Server is running',
+        db: 'connected',
+        timestamp: new Date().toISOString()
+      });
+    } catch (err: any) {
+      res.status(500).json({ 
+        status: 'error', 
+        db: 'disconnected', 
+        message: err.message,
+        timestamp: new Date().toISOString()
+      });
+    }
   });
 
   // Vite middleware for development
