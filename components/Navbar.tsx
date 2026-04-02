@@ -216,6 +216,7 @@ export const Navbar: React.FC = () => {
                     type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
                     onBlur={() => {
                         // Delay blur so users can click links before search closes
                         setTimeout(() => setIsSearchFocused(false), 200);
