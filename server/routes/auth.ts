@@ -13,7 +13,6 @@ router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
     const [existing] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     if ((existing as any[]).length > 0) {
-      console.log('Register failed: Email already exists', email);
       return res.status(400).json({ message: 'Email already exists' });
     }
 
@@ -21,8 +20,8 @@ router.post('/register', async (req, res) => {
     const userId = uuidv4();
 
     await pool.query(
-      'INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)',
-      [userId, username, email, hashedPassword]
+      'INSERT INTO users (id, username, email, password, avatar) VALUES (?, ?, ?, ?, ?)',
+      [userId, username, email, hashedPassword, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg']
     );
 
     // Default role: User
@@ -34,7 +33,6 @@ router.post('/register', async (req, res) => {
     const roleId = (roleRow as any[])[0].id;
     await pool.query('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)', [userId, roleId]);
 
-    console.log('Register successful for:', email);
     res.status(201).json({ message: 'User created' });
   } catch (error) {
     console.error('REGISTER ERROR:', error);
@@ -45,18 +43,15 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log('Login attempt for:', email);
-    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [users] = await pool.query("SELECT id, username, email, password, COALESCE(avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar FROM users WHERE email = ?", [email]);
     const user = (users as any[])[0];
 
     if (!user) {
-      console.log('Login failed: User not found', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      console.log('Login failed: Invalid password', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
@@ -89,7 +84,7 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const [users] = await pool.query('SELECT id, username, email, avatar FROM users WHERE id = ?', [req.user?.id]);
+    const [users] = await pool.query("SELECT id, username, email, COALESCE(avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar FROM users WHERE id = ?", [req.user?.id]);
     const user = (users as any[])[0];
     if (!user) return res.sendStatus(404);
 

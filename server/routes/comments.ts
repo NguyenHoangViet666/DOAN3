@@ -23,7 +23,7 @@ const fetchComments = async (query: string, params: any[]) => {
       SELECT 
         r.id, r.comment_id as commentId, r.user_id as userId, 
         r.content, r.created_at as createdAt,
-        u.username, u.avatar as userAvatar 
+        u.username, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar 
       FROM replies r 
       JOIN users u ON r.user_id = u.id 
       WHERE r.comment_id = ? 
@@ -46,7 +46,7 @@ router.get('/novel/:novelId', async (req, res) => {
       SELECT 
         c.id, c.novel_id as novelId, c.post_id as postId, 
         c.user_id as userId, c.content, c.created_at as createdAt,
-        u.username, u.avatar as userAvatar 
+        u.username, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar 
       FROM comments c 
       JOIN users u ON c.user_id = u.id 
       WHERE c.novel_id = ? 
@@ -66,7 +66,7 @@ router.get('/post/:postId', async (req, res) => {
       SELECT 
         c.id, c.novel_id as novelId, c.post_id as postId, 
         c.user_id as userId, c.content, c.created_at as createdAt,
-        u.username, u.avatar as userAvatar 
+        u.username, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar 
       FROM comments c 
       JOIN users u ON c.user_id = u.id 
       WHERE c.post_id = ? 

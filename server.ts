@@ -4,7 +4,8 @@ import path from 'path';
 import apiRoutes from './server/api';
 import { initDb, pool } from './server/db';
 
-console.log('--- SERVER STARTING ---');
+// Server starting...
+
 process.on('uncaughtException', (err) => {
   console.error('UNCAUGHT EXCEPTION:', err);
 });
@@ -71,9 +72,8 @@ async function startServer() {
     console.log(`Server running on http://localhost:${PORT}`);
     
     // Initialize database AFTER server is listening
-    console.log('Initializing database in background...');
     initDb().then(() => {
-      console.log('Database initialized successfully.');
+      // Database connected
     }).catch(err => {
       console.error('Database initialization failed:', err);
     });

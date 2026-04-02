@@ -37,7 +37,7 @@ router.get('/requests', authenticateToken, requireRole(['Admin', 'SSR', 'Mod']),
         rr.status, 
         rr.created_at as createdAt,
         u.username, 
-        u.avatar as userAvatar 
+        COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar 
       FROM role_requests rr 
       JOIN users u ON rr.user_id = u.id 
       ORDER BY rr.created_at DESC
@@ -96,7 +96,7 @@ router.get('/requests/user/:userId', authenticateToken, async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT 
-        rr.id, rr.user_id as userId, u.username, u.avatar as userAvatar,
+        rr.id, rr.user_id as userId, u.username, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar,
         rr.requested_role as requestedRole, rr.reason, rr.status, rr.created_at as createdAt
       FROM role_requests rr
       JOIN users u ON rr.user_id = u.id

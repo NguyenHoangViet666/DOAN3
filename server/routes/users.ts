@@ -12,7 +12,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
     if (!isAdmin) return res.status(403).json({ message: 'Forbidden' });
 
     const [users] = await pool.query(`
-      SELECT u.id, u.username, u.email, u.avatar 
+      SELECT u.id, u.username, u.email, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar 
       FROM users u
       ORDER BY u.created_at DESC
     `);
@@ -31,7 +31,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
 // Get user profile
 router.get('/:id', async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, username, email, avatar FROM users WHERE id = ?', [req.params.id]);
+    const [users] = await pool.query("SELECT id, username, email, COALESCE(avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar FROM users WHERE id = ?", [req.params.id]);
     const user = (users as any[])[0];
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -197,7 +197,7 @@ router.get('/me/notifications', authenticateToken, async (req: AuthRequest, res)
     const [notifications] = await pool.query(`
       SELECT 
         id, user_id as userId, type, title, message, link, 
-        is_read as isRead, actor_avatar as actorAvatar, created_at as createdAt 
+        is_read as isRead, COALESCE(actor_avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as actorAvatar, created_at as createdAt 
       FROM notifications 
       WHERE user_id = ? 
       ORDER BY created_at DESC 

@@ -19,7 +19,7 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
 
     for (let conv of (conversations as any[])) {
       const [participants] = await pool.query(`
-        SELECT u.id, u.username, u.avatar 
+        SELECT u.id, u.username, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar 
         FROM conversation_participants cp 
         JOIN users u ON cp.user_id = u.id 
         WHERE cp.conversation_id = ?

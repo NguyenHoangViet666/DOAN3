@@ -113,16 +113,16 @@ export const Navbar: React.FC = () => {
   if (location.pathname.includes('/chapter/')) return null;
 
   return (
-    <header className={`sticky top-0 z-40 transition-all duration-500 w-full ${scrolled ? 'pt-4 px-4' : 'pt-0 px-0'}`}>
-      <nav className={`mx-auto transition-all duration-500 ease-out ${
+    <header className={`sticky top-0 z-40 navbar-transition w-full ${scrolled ? 'pt-4 px-4' : 'pt-0 px-0'}`}>
+      <nav className={`mx-auto navbar-transition ${
         scrolled 
         ? 'max-w-5xl rounded-full bg-white/80 dark:bg-[#1a1b26]/80 backdrop-blur-xl border border-white/50 dark:border-slate-700/50 shadow-[0_8px_32px_rgba(31,38,135,0.07)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)]'
         : 'max-w-none w-full rounded-none bg-white/60 dark:bg-[#0f1016]/60 backdrop-blur-xl border-b border-white/20 dark:border-purple-900/30'
       }`}>
-        <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 transition-all duration-500 ${scrolled ? 'h-14' : 'h-16'}`}>
+        <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 navbar-transition ${scrolled ? 'h-14' : 'h-16'}`}>
           <div className="flex justify-between items-center h-full relative">
           {/* Logo and Main Navigation */}
-          <div className={`flex items-center transition-all duration-500 overflow-hidden origin-left ${scrolled && isSearchFocused ? 'w-0 opacity-0 md:mr-0 scale-x-0' : 'w-auto opacity-100 scale-x-100'}`}>
+          <div className={`flex items-center navbar-transition overflow-hidden origin-left ${scrolled && isSearchFocused ? 'w-0 opacity-0 md:mr-0 scale-x-0' : 'w-auto opacity-100 scale-x-100'}`}>
             <Link to="/" className="flex items-center flex-shrink-0 mr-8 group">
               <Book className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
               <span className="ml-2 text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight hidden md:block">BetoBook</span>
@@ -172,8 +172,8 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Search Bar */}
-          <div className={`flex-1 flex items-center px-2 transition-all duration-500 ${scrolled && isSearchFocused ? 'justify-start lg:ml-0' : 'justify-center lg:ml-6 lg:justify-end'}`}>
-            <div className={`w-full transition-all duration-500 ${scrolled && isSearchFocused ? 'max-w-full' : 'max-w-lg lg:max-w-xs'}`}>
+          <div className={`flex-1 flex items-center px-2 navbar-transition ${scrolled && isSearchFocused ? 'justify-start lg:ml-0' : 'justify-center lg:ml-6 lg:justify-end'}`}>
+            <div className={`w-full navbar-transition ${scrolled && isSearchFocused ? 'max-w-full' : 'max-w-lg lg:max-w-xs'}`}>
               <label htmlFor="search" className="sr-only">Tìm kiếm</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -202,7 +202,7 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center space-x-2 md:space-x-4">
                 
                 {/* Expandable Action Group */}
-                <div className={`flex items-center space-x-2 md:space-x-4 transition-all duration-500 transform origin-right ${scrolled && isSearchFocused ? 'w-0 opacity-0 scale-x-0 mx-0 overflow-hidden' : 'w-auto opacity-100 scale-x-100'}`}>
+                <div className={`flex items-center space-x-2 md:space-x-4 navbar-transition transform origin-right ${scrolled && isSearchFocused ? 'w-0 opacity-0 scale-x-0 mx-0 overflow-hidden' : 'w-auto opacity-100 scale-x-100'}`}>
                     {/* MESSAGES ICON */}
                     <Link 
                        to="/messages" 

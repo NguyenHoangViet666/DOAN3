@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
         p.view_count as viewCount, p.like_count as likeCount, 
         p.is_pinned as isPinned, p.pinned_until as pinnedUntil, 
         p.created_at as createdAt,
-        u.username as authorName, u.avatar as authorAvatar 
+        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar 
       FROM posts p 
       JOIN users u ON p.author_id = u.id 
       ORDER BY p.is_pinned DESC, p.created_at DESC
@@ -42,7 +42,7 @@ router.get('/:id', async (req, res) => {
         p.view_count as viewCount, p.like_count as likeCount, 
         p.is_pinned as isPinned, p.pinned_until as pinnedUntil, 
         p.created_at as createdAt,
-        u.username as authorName, u.avatar as authorAvatar 
+        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar 
       FROM posts p 
       JOIN users u ON p.author_id = u.id 
       WHERE p.id = ?
@@ -69,10 +69,10 @@ router.get('/user/:userId', async (req, res) => {
         p.view_count as viewCount, p.like_count as likeCount, 
         p.is_pinned as isPinned, p.pinned_until as pinnedUntil, 
         p.created_at as createdAt,
-        u.username as authorName, u.avatar as authorAvatar 
+        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar 
       FROM posts p 
       JOIN users u ON p.author_id = u.id 
-      WHERE p.author_id = ?
+      WHERE p.author_id = ? 
       ORDER BY p.created_at DESC
     `, [req.params.userId]);
     
@@ -182,4 +182,25 @@ router.put('/:id/pin', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// Delete post
+router.delete('/:id', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const [posts] = await pool.query('SELECT author_id FROM posts WHERE id = ?', [req.params.id]);
+    const post = (posts as any[])[0];
+    
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+    
+    const isAdmin = req.user?.roles.includes('Admin') || req.user?.roles.includes('SSR') || req.user?.roles.includes('Mod');
+    if (post.author_id !== req.user?.id && !isAdmin) {
+      return res.status(403).json({ message: 'Forbidden: Cannot delete this post' });
+    }
+
+    await pool.query('DELETE FROM posts WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Post deleted' });
+  } catch (error) {
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
 export default router;
+

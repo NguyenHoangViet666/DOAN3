@@ -2,7 +2,7 @@
 
 /* 1. Base Typography & Resets */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   letter-spacing: -0.02em;
 }
 
@@ -99,3 +99,43 @@ body {
   z-index: 10;
   pointer-events: none;
 }
+
+/* 4. Silver Metallic & Premium Text Effects */
+.silver-metallic-text {
+  background: linear-gradient(
+    to right,
+    #94a3b8 0%,
+    #e2e8f0 20%,
+    #ffffff 40%,
+    #f8fafc 50%,
+    #ffffff 60%,
+    #e2e8f0 80%,
+    #94a3b8 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  animation: shine-metallic 4s linear infinite;
+  display: inline-block;
+}
+
+@keyframes shine-metallic {
+  0% { background-position: 100% center; }
+  100% { background-position: -100% center; }
+}
+
+/* Navbar Smooth Transition Optimization */
+.navbar-transition {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* iOS-style fluid transition */
+  will-change: transform, border-radius, background-color, box-shadow, padding, max-width, height;
+  transform: translateZ(0); /* Force GPU acceleration */
+  backface-visibility: hidden;
+}
+
+.navbar-glass {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+}
+
