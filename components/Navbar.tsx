@@ -183,7 +183,7 @@ export const Navbar: React.FC = () => {
                   <input
                     id="search"
                     name="search"
-                    className="block w-full pl-10 pr-3 py-1.5 border border-purple-100/80 dark:border-slate-700/50 rounded-full leading-5 bg-white/50 dark:bg-black/20 backdrop-blur-md placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:bg-white dark:focus:bg-[#1a1b26] focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-slate-100 sm:text-sm transition-all"
+                    className="block w-full pl-10 pr-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded-full leading-5 bg-slate-100/90 dark:bg-slate-800/60 backdrop-blur-md placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:bg-white dark:focus:bg-[#1a1b26] focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-slate-100 sm:text-sm transition-all"
                     placeholder="Tìm truyện, tác giả..."
                     type="search"
                     value={searchQuery}
