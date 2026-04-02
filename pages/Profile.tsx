@@ -912,10 +912,27 @@ export const Profile: React.FC = () => {
                           </div>
                       </div>
                       <div>
-                          <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Thể loại (Giữ Ctrl để chọn nhiều)</label>
-                          <select multiple value={newNovel.genres} onChange={e => setNewNovel({...newNovel, genres: Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value as NovelGenre)})} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none h-32">
-                              {Object.values(NovelGenre).map(g => <option key={g} value={g}>{g}</option>)}
-                          </select>
+                          <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Thể loại</label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {Object.values(NovelGenre).map(g => (
+                                  <label key={g} className="flex items-center space-x-2 p-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:bg-[#0f1016] cursor-pointer transition-colors group">
+                                      <input 
+                                          type="checkbox" 
+                                          checked={(newNovel.genres || []).includes(g)}
+                                          onChange={(e) => {
+                                              const currentGenres = newNovel.genres || [];
+                                              if (e.target.checked) {
+                                                  setNewNovel({...newNovel, genres: [...currentGenres, g]});
+                                              } else {
+                                                  setNewNovel({...newNovel, genres: currentGenres.filter(genre => genre !== g)});
+                                              }
+                                          }}
+                                          className="w-4 h-4 text-primary rounded border-slate-300 dark:border-slate-700 focus:ring-primary"
+                                      />
+                                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{g}</span>
+                                  </label>
+                              ))}
+                          </div>
                       </div>
                       <div>
                           <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Mô tả</label>
