@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { RoleBadge } from './RoleBadge';
-import { Book, LogOut, User as UserIcon, Search, Bell, CheckCircle, MessageCircle, UserPlus, Users, Menu, X } from 'lucide-react';
-import { NovelType, Notification, NotificationType } from '../types';
-import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadMessageCount } from '../services/dbService';
+import { Book, LogOut, User as UserIcon, Search, Bell, CheckCircle, MessageCircle, UserPlus, Users, Menu, X, Loader2 } from 'lucide-react';
+import { NovelType, Notification, NotificationType, Novel } from '../types';
+import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadMessageCount, getPublicNovels } from '../services/dbService';
 
 export const Navbar: React.FC = () => {
   const { currentUser, logout } = useAuth();
@@ -14,6 +14,34 @@ export const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchResults, setSearchResults] = useState<Novel[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  // Debounced Search
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (searchQuery.trim().length >= 2) {
+      setIsSearching(true);
+      timeoutId = setTimeout(async () => {
+        const novels = await getPublicNovels();
+        const lowerCaseQuery = searchQuery.toLowerCase();
+        const filtered = novels.filter(n => 
+          (n.title && n.title.toLowerCase().includes(lowerCaseQuery)) ||
+          (n.author && n.author.toLowerCase().includes(lowerCaseQuery))
+        ).slice(0, 5); // Limit to top 5 hits
+        setSearchResults(filtered);
+        setIsSearching(false);
+      }, 500); // 500ms debounce
+    } else {
+      setSearchResults([]);
+      setIsSearching(false);
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [searchQuery]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -188,10 +216,49 @@ export const Navbar: React.FC = () => {
                     type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => setIsSearchFocused(true)}
-                    onBlur={() => setIsSearchFocused(false)}
+                    onBlur={() => {
+                        // Delay blur so users can click links before search closes
+                        setTimeout(() => setIsSearchFocused(false), 200);
+                    }}
                   />
                 </form>
+                
+                {/* Instant Search Dropdown */}
+                {isSearchFocused && searchQuery.trim().length >= 2 && (
+                    <div className="absolute top-full mt-2 w-full bg-white dark:bg-[#1a1b26] rounded-xl shadow-[0_10px_40px_-10px_rgba(124,58,237,0.3)] dark:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] border border-purple-100 dark:border-purple-900/50 overflow-hidden animate-scaleIn z-50">
+                        {isSearching ? (
+                            <div className="p-4 flex items-center justify-center text-slate-500 dark:text-slate-400">
+                                <Loader2 className="animate-spin w-5 h-5 mr-2" /> Đang tìm...
+                            </div>
+                        ) : searchResults.length > 0 ? (
+                            <div className="max-h-80 overflow-y-auto">
+                                {searchResults.map(result => (
+                                    <Link 
+                                        to={`/novel/${result.id}`} 
+                                        key={result.id}
+                                        className="flex items-center p-3 hover:bg-slate-50 dark:hover:bg-[#0f1016] border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors"
+                                    >
+                                        <img src={result.coverUrl} className="w-10 h-14 object-cover rounded-md shadow-sm" alt=""/>
+                                        <div className="ml-3 overflow-hidden">
+                                            <div className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{result.title}</div>
+                                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-1">{result.author}</div>
+                                        </div>
+                                    </Link>
+                                ))}
+                                <Link 
+                                    to={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
+                                    className="block text-center p-3 text-xs font-bold text-primary hover:bg-primary/5 transition-colors bg-slate-50 dark:bg-slate-900/50"
+                                >
+                                    Xem tất cả kết quả cho "{searchQuery}"
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="p-4 text-center text-sm text-slate-500 dark:text-slate-400">
+                                Không tìm thấy truyện hay tác giả phù hợp.
+                            </div>
+                        )}
+                    </div>
+                )}
               </div>
             </div>
           </div>
