@@ -830,32 +830,32 @@ export const Profile: React.FC = () => {
                   <form onSubmit={handleSubmitNovel} className="p-4 md:p-6 space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                              <label className="block text-sm font-medium mb-1">Tên truyện</label>
-                              <input value={newNovel.title} onChange={e=>setNewNovel({...newNovel, title: e.target.value})} className="w-full border p-2 rounded" required/>
+                              <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Tên truyện</label>
+                              <input value={newNovel.title} onChange={e=>setNewNovel({...newNovel, title: e.target.value})} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none" required/>
                           </div>
                           <div>
-                              <label className="block text-sm font-medium mb-1">Tác giả</label>
-                              <input value={newNovel.author} onChange={e=>setNewNovel({...newNovel, author: e.target.value})} className="w-full border p-2 rounded" required/>
+                              <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Tác giả</label>
+                              <input value={newNovel.author} onChange={e=>setNewNovel({...newNovel, author: e.target.value})} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none" required/>
                           </div>
                       </div>
                       <div>
-                          <label className="block text-sm font-medium mb-1">Loại</label>
-                          <select value={newNovel.type} onChange={e=>setNewNovel({...newNovel, type: e.target.value as NovelType})} className="w-full border p-2 rounded">
+                          <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Loại</label>
+                          <select value={newNovel.type} onChange={e=>setNewNovel({...newNovel, type: e.target.value as NovelType})} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none">
                               <option value={NovelType.TRANSLATED}>{NovelType.TRANSLATED}</option>
                               <option value={NovelType.ORIGINAL}>{NovelType.ORIGINAL}</option>
                           </select>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                              <label className="block text-sm font-medium mb-1">Độ dài</label>
-                              <select value={newNovel.length} onChange={e=>setNewNovel({...newNovel, length: e.target.value as NovelLength})} className="w-full border p-2 rounded">
+                              <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Độ dài</label>
+                              <select value={newNovel.length} onChange={e=>setNewNovel({...newNovel, length: e.target.value as NovelLength})} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none">
                                   <option value={NovelLength.SERIES}>{NovelLength.SERIES}</option>
                                   <option value={NovelLength.ONESHOT}>{NovelLength.ONESHOT}</option>
                               </select>
                           </div>
                           <div>
-                              <label className="block text-sm font-medium mb-1">Tình trạng</label>
-                              <select value={newNovel.status} onChange={e=>setNewNovel({...newNovel, status: e.target.value as NovelStatus})} className="w-full border p-2 rounded">
+                              <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Tình trạng</label>
+                              <select value={newNovel.status} onChange={e=>setNewNovel({...newNovel, status: e.target.value as NovelStatus})} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none">
                                   <option value={NovelStatus.ONGOING}>{NovelStatus.ONGOING}</option>
                                   <option value={NovelStatus.COMPLETED}>{NovelStatus.COMPLETED}</option>
                                   <option value={NovelStatus.PAUSED}>{NovelStatus.PAUSED}</option>
@@ -863,18 +863,18 @@ export const Profile: React.FC = () => {
                           </div>
                       </div>
                       <div>
-                          <label className="block text-sm font-medium mb-1">Thể loại (Giữ Ctrl để chọn nhiều)</label>
-                          <select multiple value={newNovel.genres} onChange={e => setNewNovel({...newNovel, genres: Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value as NovelGenre)})} className="w-full border p-2 rounded h-32">
+                          <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Thể loại (Giữ Ctrl để chọn nhiều)</label>
+                          <select multiple value={newNovel.genres} onChange={e => setNewNovel({...newNovel, genres: Array.from(e.target.selectedOptions, (option: HTMLOptionElement) => option.value as NovelGenre)})} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none h-32">
                               {Object.values(NovelGenre).map(g => <option key={g} value={g}>{g}</option>)}
                           </select>
                       </div>
                       <div>
-                          <label className="block text-sm font-medium mb-1">Mô tả</label>
-                          <textarea value={newNovel.description} onChange={e=>setNewNovel({...newNovel, description: e.target.value})} className="w-full border p-2 rounded h-24" required></textarea>
+                          <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Mô tả</label>
+                          <textarea value={newNovel.description} onChange={e=>setNewNovel({...newNovel, description: e.target.value})} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none h-24" required></textarea>
                       </div>
                       <div>
-                          <label className="block text-sm font-medium mb-1">Ảnh bìa</label>
-                          <input type="file" onChange={e => setNovelCoverFile(e.target.files ? e.target.files[0] : null)} className="w-full border p-2 rounded" accept="image/*"/>
+                          <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Ảnh bìa</label>
+                          <input type="file" onChange={e => setNovelCoverFile(e.target.files ? e.target.files[0] : null)} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-slate-900 dark:text-slate-100 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*"/>
                       </div>
                       <div className="flex justify-end pt-4">
                           <button type="submit" disabled={submittingNovel} className="bg-primary text-white px-6 py-2 rounded-lg font-bold flex items-center">
@@ -896,15 +896,15 @@ export const Profile: React.FC = () => {
                   </div>
                   <form onSubmit={handleSubmitRoleRequest} className="p-6 space-y-4">
                       <div>
-                          <label className="block text-sm font-medium mb-1">Loại quyền muốn nhận</label>
-                          <select value={roleRequestType} onChange={e=>setRoleRequestType(e.target.value as any)} className="w-full border p-2 rounded">
+                          <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Loại quyền muốn nhận</label>
+                          <select value={roleRequestType} onChange={e=>setRoleRequestType(e.target.value as any)} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none">
                               <option value={Role.AUTHOR}>{Role.AUTHOR} (Cho tác giả sáng tác)</option>
                               <option value={Role.TRANSLATOR}>{Role.TRANSLATOR} (Cho dịch giả)</option>
                           </select>
                       </div>
                       <div>
-                          <label className="block text-sm font-medium mb-1">Lý do / Kinh nghiệm</label>
-                          <textarea value={roleRequestReason} onChange={e=>setRoleRequestReason(e.target.value)} className="w-full border p-2 rounded h-24" placeholder="Ví dụ: Tôi đã có kinh nghiệm dịch 2 bộ truyện..." required></textarea>
+                          <label className="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Lý do / Kinh nghiệm</label>
+                          <textarea value={roleRequestReason} onChange={e=>setRoleRequestReason(e.target.value)} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2.5 rounded-xl text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all outline-none h-24" placeholder="Ví dụ: Tôi đã có kinh nghiệm dịch 2 bộ truyện..." required></textarea>
                       </div>
                       <div className="flex justify-end pt-4">
                           <button type="submit" disabled={submittingRequest} className="bg-primary text-white px-6 py-2 rounded-lg font-bold flex items-center">
@@ -930,9 +930,9 @@ export const Profile: React.FC = () => {
                           <div className="font-bold text-slate-900 dark:text-slate-100">{editingUser.username}</div>
                       </div>
                       <div className="space-y-2">
-                          <label className="block text-sm font-medium mb-2">Chọn quyền (Có thể chọn nhiều):</label>
+                          <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Chọn quyền (Có thể chọn nhiều):</label>
                           {Object.values(Role).map(role => (
-                              <label key={role} className="flex items-center space-x-3 p-2 border rounded hover:bg-slate-50 dark:bg-[#0f1016] cursor-pointer transition-colors">
+                              <label key={role} className="flex items-center space-x-3 p-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:bg-[#0f1016] cursor-pointer transition-colors group">
                                   <input 
                                       type="checkbox" 
                                       checked={editingRoles.includes(role)}
@@ -944,7 +944,7 @@ export const Profile: React.FC = () => {
                           ))}
                       </div>
                       <div className="flex justify-end pt-4 gap-2">
-                          <button onClick={()=>setShowEditRoleModal(false)} className="px-4 py-2 border rounded-lg font-medium hover:bg-slate-50 dark:bg-[#0f1016]">Hủy</button>
+                          <button onClick={()=>setShowEditRoleModal(false)} className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl font-medium hover:bg-slate-50 dark:bg-[#0f1016]">Hủy</button>
                           <button onClick={handleSaveRoles} className="bg-primary text-white px-6 py-2 rounded-lg font-bold flex items-center shadow-md hover:bg-blue-600">
                               Lưu thay đổi
                           </button>
