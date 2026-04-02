@@ -11,6 +11,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
+
+    // Password Complexity Validation (Backend)
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ message: 'Mật khẩu phải ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&#).' });
+    }
+
     const [existing] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     if ((existing as any[]).length > 0) {
       return res.status(400).json({ message: 'Email already exists' });

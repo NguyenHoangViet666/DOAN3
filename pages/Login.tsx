@@ -29,6 +29,15 @@ export const Login: React.FC = () => {
         setIsLoading(false);
         return;
       }
+
+      // Password Complexity Validation
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        setError('Mật khẩu phải ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&#).');
+        setIsLoading(false);
+        return;
+      }
+
       success = await register(formData.username, formData.email, formData.password);
     } else {
       if (!formData.email || !formData.password) {
@@ -148,6 +157,11 @@ export const Login: React.FC = () => {
                   onChange={e => setFormData({...formData, password: e.target.value})} 
                 />
               </div>
+              {isRegister && (
+                  <p className="mt-2 text-[10px] text-slate-500 dark:text-slate-400 px-1 italic">
+                    * Yêu cầu: ít nhất 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.
+                  </p>
+              )}
             </div>
 
             <button 
