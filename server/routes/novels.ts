@@ -21,6 +21,8 @@ router.get('/', async (req, res) => {
       params.push(isPending === 'true' ? 1 : 0);
     }
 
+    query += ' ORDER BY is_pending DESC, created_at DESC';
+
     const [novels] = await pool.query(query, params);
     const novelsList = novels as any[];
     
