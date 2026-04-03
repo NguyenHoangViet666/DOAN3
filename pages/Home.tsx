@@ -76,7 +76,7 @@ export const Home: React.FC = () => {
   // Tabs & Pagination for "Latest Updates"
   const [activeTab, setActiveTab] = useState<NovelType>(NovelType.TRANSLATED);
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 12;
+  const ITEMS_PER_PAGE = 24;
 
   // Carousel State
   const [currentSlide, setCurrentSlide] = useState(0);
