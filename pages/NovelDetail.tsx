@@ -277,15 +277,18 @@ export const NovelDetail: React.FC = () => {
           let dTitle = chap.title;
           
           if (match) {
-              volName = match[1];
-              dTitle = match[2];
+              volName = match[1].trim();
+              dTitle = match[2].trim();
           }
 
-          if (!volumeMap.has(volName)) {
-              volumeMap.set(volName, []);
-              groups.push({ volumeName: volName, chapters: volumeMap.get(volName)! });
+          // Use string normalization to avoid bugs where different case or unseen spacing split the groups
+          const normalizedKey = volName.toLowerCase().replace(/\s+/g, ' ').trim();
+
+          if (!volumeMap.has(normalizedKey)) {
+              volumeMap.set(normalizedKey, []);
+              groups.push({ volumeName: volName, chapters: volumeMap.get(normalizedKey)! });
           }
-          volumeMap.get(volName)!.push({ ...chap, displayTitle: dTitle });
+          volumeMap.get(normalizedKey)!.push({ ...chap, displayTitle: dTitle });
       });
 
       return groups;
@@ -409,12 +412,16 @@ export const NovelDetail: React.FC = () => {
                                         <ul className="divide-y divide-slate-50">
                                             {currentChapters.map((chapter, index) => {
                                                 const displayIndex = (currentPage - 1) * CHAPTERS_PER_PAGE + index + 1;
+                                                const lowerTitle = chapter.displayTitle.toLowerCase();
+                                                const preventPrefix = lowerTitle.startsWith('chương') || lowerTitle.startsWith('prologue') || lowerTitle.startsWith('epilogue') || lowerTitle.startsWith('phiên ngoại') || lowerTitle.startsWith('ngoại truyện');
+                                                const displayStr = preventPrefix ? chapter.displayTitle : `Chương ${displayIndex}: ${chapter.displayTitle}`;
+                                                
                                                 return (
                                                     <li key={chapter.id} className="relative group hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-transparent transition-all duration-300 border-l-4 border-transparent hover:border-indigo-500">
                                                         <Link to={`/novel/${novel.id}/chapter/${chapter.id}`} className="block px-8 py-4 w-full h-full flex items-center justify-between">
                                                             <div className="flex flex-col sm:flex-row sm:items-center truncate mr-10 flex-1">
                                                                 <span className="text-slate-700 dark:text-slate-200 font-bold group-hover:text-indigo-700 group-hover:translate-x-2 transition-all duration-300 mr-2">
-                                                                    {chapter.displayTitle}
+                                                                    {displayStr}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center text-xs font-semibold text-slate-400 dark:text-slate-500 flex-shrink-0 gap-4">
