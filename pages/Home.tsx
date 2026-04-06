@@ -243,9 +243,9 @@ export const Home: React.FC = () => {
                    <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full transition-colors hidden md:block">
                        <ChevronRight className="w-8 h-8"/>
                    </button>
-                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+                   <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex space-x-3 items-center min-h-[20px]">
                        {featuredNovels.map((_, idx) => (
-                           <button key={idx} onClick={() => setCurrentSlide(idx)} className={`h-2.5 rounded-full transition-all duration-300 ${idx === currentSlide ? 'bg-white w-8' : 'w-2.5 bg-white/40 hover:bg-white/60'}`} />
+                           <button key={idx} onClick={() => setCurrentSlide(idx)} className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ease-out flex-shrink-0 ${idx === currentSlide ? 'bg-white scale-[1.5] shadow-[0_0_12px_rgba(255,255,255,0.9)] ring-[1px] ring-white/50' : 'bg-white/40 hover:bg-white/70 hover:scale-[1.2]'}`} />
                        ))}
                    </div>
                </>

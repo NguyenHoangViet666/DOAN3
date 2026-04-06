@@ -21,6 +21,7 @@ export const ChapterDetail: React.FC = () => {
 
     // Edit State
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [editVolume, setEditVolume] = useState('');
     const [editTitle, setEditTitle] = useState('');
     const [editContent, setEditContent] = useState('');
     const [updating, setUpdating] = useState(false);
@@ -121,7 +122,14 @@ export const ChapterDetail: React.FC = () => {
 
     const handleOpenEdit = () => {
         if (chapter) {
-            setEditTitle(chapter.title);
+            const match = chapter.title.match(/^\[(.*?)\]\s*(.*)$/);
+            if (match) {
+                setEditVolume(match[1]);
+                setEditTitle(match[2]);
+            } else {
+                setEditVolume('');
+                setEditTitle(chapter.title);
+            }
             setEditContent(chapter.content);
             setIsEditOpen(true);
         }
@@ -130,10 +138,13 @@ export const ChapterDetail: React.FC = () => {
     const handleSaveEdit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!chapter || !chapterId) return;
+        
+        const finalTitle = editVolume.trim() ? `[${editVolume.trim()}] ${editTitle}` : editTitle;
+        
         setUpdating(true);
         try {
-            const result = await updateChapter(chapterId, editTitle, editContent);
-            setChapter({ ...chapter, title: editTitle, content: editContent, wordCount: result.wordCount });
+            const result = await updateChapter(chapterId, finalTitle, editContent);
+            setChapter({ ...chapter, title: finalTitle, content: editContent, wordCount: result.wordCount });
             setIsEditOpen(false);
             showToast("Cập nhật chương thành công!", 'success');
         } catch (e) {
@@ -402,14 +413,25 @@ export const ChapterDetail: React.FC = () => {
                         </div>
 
                         <form onSubmit={handleSaveEdit} className="p-6 flex-1 flex flex-col space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Tên chương <span className="text-red-500">*</span></label>
-                                <input
-                                    value={editTitle}
-                                    onChange={e => setEditTitle(e.target.value)}
-                                    className="w-full border p-2 rounded focus:ring-2 focus:ring-primary/50 outline-none"
-                                    required
-                                />
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div className="md:col-span-1">
+                                    <label className="block text-sm font-medium mb-1">Tên Tập</label>
+                                    <input
+                                        value={editVolume}
+                                        onChange={e => setEditVolume(e.target.value)}
+                                        className="w-full border p-2 rounded focus:ring-2 focus:ring-primary/50 outline-none"
+                                        placeholder="VD: Tập 1"
+                                    />
+                                </div>
+                                <div className="md:col-span-3">
+                                    <label className="block text-sm font-medium mb-1">Tên chương <span className="text-red-500">*</span></label>
+                                    <input
+                                        value={editTitle}
+                                        onChange={e => setEditTitle(e.target.value)}
+                                        className="w-full border p-2 rounded focus:ring-2 focus:ring-primary/50 outline-none"
+                                        required
+                                    />
+                                </div>
                             </div>
 
                             <div className="flex-1 flex flex-col">
