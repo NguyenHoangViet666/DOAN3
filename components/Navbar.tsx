@@ -5,7 +5,7 @@ import { RoleBadge } from './RoleBadge';
 import { Book, LogOut, User as UserIcon, Search, Bell, CheckCircle, MessageCircle, UserPlus, Users, Menu, X, Loader2 } from 'lucide-react';
 import { NovelType, Notification, NotificationType, Novel } from '../types';
 import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadMessageCount, getPublicNovels } from '../services/dbService';
-import { Logo } from './Logo';
+
 
 export const Navbar: React.FC = () => {
   const { currentUser, logout } = useAuth();
@@ -153,7 +153,8 @@ export const Navbar: React.FC = () => {
           {/* Logo and Main Navigation */}
           <div className={`flex items-center navbar-transition overflow-hidden origin-left ${scrolled && isSearchFocused ? 'w-0 opacity-0 md:mr-0 scale-x-0' : 'w-auto opacity-100 scale-x-100'}`}>
             <Link to="/" className="flex items-center flex-shrink-0 mr-8 group">
-              <Logo className="h-10 w-10 object-contain group-hover:scale-110 transition-transform drop-shadow-sm" />
+              <img src="/Logof.png" className="block dark:hidden h-[43px] w-auto object-contain group-hover:scale-110 transition-transform drop-shadow-sm" alt="Logo Light" />
+              <img src="/logow.png" className="hidden dark:block h-[43px] w-auto object-contain group-hover:scale-110 transition-transform drop-shadow-sm" alt="Logo Dark" />
               <span className="ml-[6px] text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight hidden md:block">BetoBook</span>
             </Link>
             
