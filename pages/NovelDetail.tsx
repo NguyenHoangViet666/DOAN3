@@ -33,8 +33,12 @@ export const NovelDetail: React.FC = () => {
   const [submittingRating, setSubmittingRating] = useState(false);
 
   // Pagination for Chapters
-  const [chapterPage, setChapterPage] = useState(1);
+  const [volumePages, setVolumePages] = useState<Record<string, number>>({});
   const CHAPTERS_PER_PAGE = 20;
+
+  const handlePageChange = (volumeName: string, page: number) => {
+      setVolumePages(prev => ({ ...prev, [volumeName]: page }));
+  };
 
   // Comment States
   const [commentContent, setCommentContent] = useState('');
@@ -44,6 +48,7 @@ export const NovelDetail: React.FC = () => {
 
   // Modals
   const [isAddChapterOpen, setIsAddChapterOpen] = useState(false);
+  const [newVolumeTitle, setNewVolumeTitle] = useState('');
   const [newChapterTitle, setNewChapterTitle] = useState('');
   const [newChapterContent, setNewChapterContent] = useState('');
   const [uploadingChapter, setUploadingChapter] = useState(false);
@@ -193,12 +198,15 @@ export const NovelDetail: React.FC = () => {
       e.preventDefault();
       if (!id || !newChapterTitle || !newChapterContent) return;
       
+      const formatTitle = newVolumeTitle.trim() ? `[${newVolumeTitle.trim()}] ${newChapterTitle}` : newChapterTitle;
+      
       setUploadingChapter(true);
       try {
-          await addChapter(id, newChapterTitle, newChapterContent);
+          await addChapter(id, formatTitle, newChapterContent);
           const updatedChapters = await getChapters(id);
           setChapters(updatedChapters);
           setIsAddChapterOpen(false);
+          setNewVolumeTitle('');
           setNewChapterTitle('');
           setNewChapterContent('');
           showToast("Thêm chương thành công!", 'success');
@@ -253,10 +261,35 @@ export const NovelDetail: React.FC = () => {
       }
   };
 
-  const currentChapters = chapters.slice((chapterPage - 1) * CHAPTERS_PER_PAGE, chapterPage * CHAPTERS_PER_PAGE);
-  const totalChapterPages = Math.ceil(chapters.length / CHAPTERS_PER_PAGE);
   const canEdit = currentUser && (currentUser.id === novel?.uploaderId || isAdmin || isMod);
   const isLiked = currentUser?.likedNovelIds?.includes(id || '');
+
+  // Group chapters by volume utilizing the [Volume] naming convention
+  const groupedVolumes = useMemo(() => {
+      if (chapters.length === 0) return [];
+      
+      const groups: { volumeName: string; chapters: (Chapter & { displayTitle: string })[] }[] = [];
+      const volumeMap = new Map<string, (Chapter & { displayTitle: string })[]>();
+
+      chapters.forEach(chap => {
+          const match = chap.title.match(/^\[(.*?)\]\s*(.*)$/);
+          let volName = "Danh sách chương";
+          let dTitle = chap.title;
+          
+          if (match) {
+              volName = match[1];
+              dTitle = match[2];
+          }
+
+          if (!volumeMap.has(volName)) {
+              volumeMap.set(volName, []);
+              groups.push({ volumeName: volName, chapters: volumeMap.get(volName)! });
+          }
+          volumeMap.get(volName)!.push({ ...chap, displayTitle: dTitle });
+      });
+
+      return groups;
+  }, [chapters]);
 
   if (loading) {
       return <LoadingScreen />;
@@ -360,58 +393,66 @@ export const NovelDetail: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* CHAPTERS CARD */}
-                    <div className="bg-white/90 dark:bg-[#1a1b26]/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white mb-10 text-left overflow-hidden transition-all duration-300 hover:shadow-2xl flex flex-col">
-                        <div className="p-6 border-b border-slate-100 bg-white/50 dark:bg-[#1a1b26]/50 flex justify-between items-center">
-                            <h3 className="font-extrabold text-xl flex items-center text-slate-800 dark:text-slate-100"><FileText className="w-6 h-6 mr-3 text-indigo-500"/> Danh sách chương <span className="ml-3 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold shadow-inner">{chapters.length}</span></h3>
-                        </div>
-                        <div className="">
-                            {chapters.length > 0 ? (
-                                <>
-                                    <ul className="divide-y divide-slate-50">
-                                        {currentChapters.map((chapter, index) => {
-                                            const displayIndex = (chapterPage - 1) * CHAPTERS_PER_PAGE + index + 1;
-                                            return (
-                                                <li key={chapter.id} className="relative group hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-transparent transition-all duration-300 border-l-4 border-transparent hover:border-indigo-500">
-                                                    <Link to={`/novel/${novel.id}/chapter/${chapter.id}`} className="block px-8 py-4 w-full h-full flex items-center justify-between">
-                                                        <div className="flex flex-col sm:flex-row sm:items-center truncate mr-10 flex-1">
-                                                            <span className="text-slate-700 dark:text-slate-200 font-bold group-hover:text-indigo-700 group-hover:translate-x-2 transition-all duration-300 mr-2">
-                                                                Chương {displayIndex}: {chapter.title}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-center text-xs font-semibold text-slate-400 dark:text-slate-500 flex-shrink-0 gap-4">
-                                                            {chapter.wordCount !== undefined && (
-                                                                <span className="flex items-center hidden sm:flex bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded" title="Số từ">
-                                                                    <AlignLeft className="w-3 h-3 mr-1 text-slate-500 dark:text-slate-400 dark:text-slate-500"/> {chapter.wordCount.toLocaleString()} chữ
+                    {/* CHAPTERS CARDS */}
+                    {groupedVolumes.length > 0 ? (
+                        groupedVolumes.map((group, groupIndex) => {
+                            const currentPage = volumePages[group.volumeName] || 1;
+                            const totalPages = Math.ceil(group.chapters.length / CHAPTERS_PER_PAGE);
+                            const currentChapters = group.chapters.slice((currentPage - 1) * CHAPTERS_PER_PAGE, currentPage * CHAPTERS_PER_PAGE);
+                            
+                            return (
+                                <div key={groupIndex} className="bg-white/90 dark:bg-[#1a1b26]/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white mb-10 text-left overflow-hidden transition-all duration-300 hover:shadow-2xl flex flex-col">
+                                    <div className="p-6 border-b border-slate-100 bg-white/50 dark:bg-[#1a1b26]/50 flex justify-between items-center">
+                                        <h3 className="font-extrabold text-xl flex items-center text-slate-800 dark:text-slate-100"><FileText className="w-6 h-6 mr-3 text-indigo-500"/> {group.volumeName} <span className="ml-3 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold shadow-inner">{group.chapters.length}</span></h3>
+                                    </div>
+                                    <div className="">
+                                        <ul className="divide-y divide-slate-50">
+                                            {currentChapters.map((chapter, index) => {
+                                                const displayIndex = (currentPage - 1) * CHAPTERS_PER_PAGE + index + 1;
+                                                return (
+                                                    <li key={chapter.id} className="relative group hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-transparent transition-all duration-300 border-l-4 border-transparent hover:border-indigo-500">
+                                                        <Link to={`/novel/${novel.id}/chapter/${chapter.id}`} className="block px-8 py-4 w-full h-full flex items-center justify-between">
+                                                            <div className="flex flex-col sm:flex-row sm:items-center truncate mr-10 flex-1">
+                                                                <span className="text-slate-700 dark:text-slate-200 font-bold group-hover:text-indigo-700 group-hover:translate-x-2 transition-all duration-300 mr-2">
+                                                                    Chương {displayIndex}: {chapter.displayTitle}
                                                                 </span>
-                                                            )}
-                                                            <span className="bg-slate-50 dark:bg-[#0f1016] px-2 py-1 rounded">{formatDate(chapter.createdAt)}</span>
-                                                        </div>
-                                                    </Link>
-                                                    {canEdit && (
-                                                        <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
-                                                            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteModal({ isOpen: true, chapterId: chapter.id, chapterTitle: chapter.title }); }} className="p-2 text-slate-400 dark:text-slate-500 hover:text-white hover:bg-red-500 rounded-lg shadow-sm transition-all" title="Xóa chương">
-                                                                <Trash2 className="w-4 h-4"/>
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                    {totalChapterPages > 1 && (
-                                        <div className="p-6 border-t border-slate-100 bg-white/50 dark:bg-[#1a1b26]/50 flex justify-center items-center gap-3">
-                                            <button onClick={() => setChapterPage(p => Math.max(1, p - 1))} disabled={chapterPage === 1} className="p-2.5 bg-white dark:bg-[#1a1b26] border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:bg-[#0f1016] disabled:opacity-50 shadow-sm transition-all"><ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300"/></button>
-                                            <span className="text-sm text-slate-700 dark:text-slate-200 font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl">Trang {chapterPage} / {totalChapterPages}</span>
-                                            <button onClick={() => setChapterPage(p => Math.min(totalChapterPages, p + 1))} disabled={chapterPage === totalChapterPages} className="p-2.5 bg-white dark:bg-[#1a1b26] border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:bg-[#0f1016] disabled:opacity-50 shadow-sm transition-all"><ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-300"/></button>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="p-12 text-center text-slate-500 dark:text-slate-400 dark:text-slate-500 font-medium">Chưa có chương nào được đăng.</div>
-                            )}
+                                                            </div>
+                                                            <div className="flex items-center text-xs font-semibold text-slate-400 dark:text-slate-500 flex-shrink-0 gap-4">
+                                                                {chapter.wordCount !== undefined && (
+                                                                    <span className="flex items-center hidden sm:flex bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded" title="Số từ">
+                                                                        <AlignLeft className="w-3 h-3 mr-1 text-slate-500 dark:text-slate-400 dark:text-slate-500"/> {chapter.wordCount.toLocaleString()} chữ
+                                                                    </span>
+                                                                )}
+                                                                <span className="bg-slate-50 dark:bg-[#0f1016] px-2 py-1 rounded">{formatDate(chapter.createdAt)}</span>
+                                                            </div>
+                                                        </Link>
+                                                        {canEdit && (
+                                                            <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
+                                                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteModal({ isOpen: true, chapterId: chapter.id, chapterTitle: chapter.title }); }} className="p-2 text-slate-400 dark:text-slate-500 hover:text-white hover:bg-red-500 rounded-lg shadow-sm transition-all" title="Xóa chương">
+                                                                    <Trash2 className="w-4 h-4"/>
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                        {totalPages > 1 && (
+                                            <div className="p-6 border-t border-slate-100 bg-white/50 dark:bg-[#1a1b26]/50 flex justify-center items-center gap-3">
+                                                <button onClick={() => handlePageChange(group.volumeName, Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="p-2.5 bg-white dark:bg-[#1a1b26] border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:bg-[#0f1016] disabled:opacity-50 shadow-sm transition-all"><ChevronLeft className="w-5 h-5 text-slate-600 dark:text-slate-300"/></button>
+                                                <span className="text-sm text-slate-700 dark:text-slate-200 font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl">Trang {currentPage} / {totalPages}</span>
+                                                <button onClick={() => handlePageChange(group.volumeName, Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} className="p-2.5 bg-white dark:bg-[#1a1b26] border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:bg-[#0f1016] disabled:opacity-50 shadow-sm transition-all"><ChevronRight className="w-5 h-5 text-slate-600 dark:text-slate-300"/></button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <div className="bg-white/90 dark:bg-[#1a1b26]/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white mb-10 p-12 text-center text-slate-500 dark:text-slate-400 font-medium transition-all duration-300 hover:shadow-2xl">
+                             Chưa có chương nào được đăng.
                         </div>
-                    </div>
+                    )}
 
                     <div className="bg-white/90 dark:bg-[#1a1b26]/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/50 border border-white p-8 text-left transition-all duration-300 hover:shadow-2xl">
                         <h3 className="font-extrabold mb-6 flex items-center text-xl text-slate-800 dark:text-slate-100"><MessageSquare className="w-6 h-6 mr-3 text-indigo-500 fill-indigo-100"/> Bình luận</h3>
@@ -494,7 +535,10 @@ export const NovelDetail: React.FC = () => {
                         <button type="button" onClick={()=>setIsAddChapterOpen(false)} className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:text-slate-300"><X className="w-6 h-6"/></button>
                     </div>
                     <form onSubmit={handleAddChapter} className="p-6 flex-1 flex flex-col space-y-4">
-                        <div><label className="block text-sm font-medium mb-1">Tên chương <span className="text-red-500">*</span></label><input value={newChapterTitle} onChange={e=>setNewChapterTitle(e.target.value)} className="w-full border p-2 rounded focus:ring-2 focus:ring-primary/50 outline-none" placeholder="Ví dụ: Chương 1: Khởi đầu" required/></div>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="md:col-span-1"><label className="block text-sm font-medium mb-1">Tên Tập (Tùy chọn)</label><input value={newVolumeTitle} onChange={e=>setNewVolumeTitle(e.target.value)} className="w-full border p-2 rounded focus:ring-2 focus:ring-primary/50 outline-none" placeholder="VD: Tập 1"/></div>
+                            <div className="md:col-span-3"><label className="block text-sm font-medium mb-1">Tên chương <span className="text-red-500">*</span></label><input value={newChapterTitle} onChange={e=>setNewChapterTitle(e.target.value)} className="w-full border p-2 rounded focus:ring-2 focus:ring-primary/50 outline-none" placeholder="Ví dụ: Chương 1: Khởi đầu" required/></div>
+                        </div>
                         <div className="flex-1 flex flex-col"><label className="block text-sm font-medium mb-1">Nội dung <span className="text-red-500">*</span></label><RichTextEditor value={newChapterContent} onChange={setNewChapterContent} className="flex-1 min-h-[400px]" /></div>
                         <div className="pt-4 border-t flex justify-end space-x-3"><button type="button" onClick={()=>setIsAddChapterOpen(false)} className="px-5 py-2 border rounded font-medium hover:bg-slate-50 dark:bg-[#0f1016]">Hủy bỏ</button><button type="submit" disabled={uploadingChapter || !newChapterContent} className="px-5 py-2 bg-primary text-white rounded font-bold hover:bg-blue-600 flex items-center">{uploadingChapter ? <Loader2 className="animate-spin w-5 h-5 mr-2"/> : <Plus className="w-5 h-5 mr-2"/>}{uploadingChapter ? 'Đang đăng...' : 'Đăng chương'}</button></div>
                     </form>
