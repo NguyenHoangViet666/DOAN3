@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Novel, NovelType } from '../types';
 import { getPublicNovels } from '../services/dbService';
 import { Search, Star, Loader2, ChevronLeft, ChevronRight, Sparkles, Zap, Globe, PenTool, TrendingUp, BookOpen, Flame } from 'lucide-react';
-import { NovelCardSkeleton, BannerSkeleton } from '../components/Skeleton';
+import { LoadingScreen } from '../components/LoadingScreen';
 
 // Helper: Seeded Random Shuffle
 // Giúp trộn mảng ngẫu nhiên nhưng cố định theo một chuỗi (seed) đầu vào
@@ -153,46 +153,7 @@ export const Home: React.FC = () => {
   const totalPages = Math.ceil(filteredNovels.length / ITEMS_PER_PAGE);
   const latestNovels = filteredNovels.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
   if (loading) {
-      return (
-          <div className="pb-12 space-y-12 animate-fadeIn">
-              <BannerSkeleton />
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 md:space-y-16">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
-                      <div className="lg:col-span-2 space-y-12">
-                          <div>
-                              <div className="h-8 w-48 bg-slate-200 rounded mb-6 animate-pulse"></div>
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 gap-3 md:gap-6">
-                                  {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <NovelCardSkeleton key={i} />)}
-                              </div>
-                          </div>
-                          <div>
-                              <div className="h-8 w-48 bg-slate-200 rounded mb-6 animate-pulse"></div>
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-8 gap-3 md:gap-6">
-                                  {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <NovelCardSkeleton key={i} />)}
-                              </div>
-                          </div>
-                      </div>
-                      <div className="lg:col-span-1">
-                          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 h-96 animate-pulse">
-                              <div className="h-6 w-32 bg-slate-200 rounded mb-6"></div>
-                              <div className="space-y-4">
-                                  {[1, 2, 3, 4, 5].map(i => (
-                                      <div key={i} className="flex gap-4">
-                                          <div className="w-8 h-8 rounded-full bg-slate-200"></div>
-                                          <div className="w-12 h-16 bg-slate-200 rounded"></div>
-                                          <div className="flex-1 space-y-2">
-                                              <div className="h-4 w-full bg-slate-200 rounded"></div>
-                                              <div className="h-3 w-1/2 bg-slate-200 rounded"></div>
-                                          </div>
-                                      </div>
-                                  ))}
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      );
+      return <LoadingScreen />;
   }
 
   // Lấy ảnh bìa hiện tại để render nền mờ (Ambient light effect)

@@ -8,7 +8,7 @@ import { useNotification } from '../context/NotificationContext';
 import { BookOpen, Clock, User, Heart, Send, MessageSquare, Loader2, ThumbsUp, Plus, FileText, X, Edit, UploadCloud, Trash2, AlertTriangle, ChevronLeft, ChevronRight, AlignLeft, Star } from 'lucide-react';
 import { RoleBadge } from '../components/RoleBadge';
 import { RichTextEditor } from '../components/RichTextEditor';
-import { Skeleton } from '../components/Skeleton';
+import { LoadingScreen } from '../components/LoadingScreen';
 
 const formatDate = (dateStr: any) => {
     if (!dateStr) return 'Đang cập nhật...';
@@ -259,48 +259,7 @@ export const NovelDetail: React.FC = () => {
   const isLiked = currentUser?.likedNovelIds?.includes(id || '');
 
   if (loading) {
-      return (
-          <div className="bg-slate-50 dark:bg-[#0f1016] min-h-screen pb-12 animate-fadeIn">
-              <div className="h-48 bg-slate-900 w-full absolute top-16 left-0 z-0 overflow-hidden animate-pulse"></div>
-              <div className="max-w-6xl mx-auto px-4 relative z-10 pt-12">
-                  <div className="flex flex-col md:flex-row gap-8">
-                      <div className="flex-shrink-0 w-48 mx-auto md:mx-0">
-                          <Skeleton className="w-48 h-72 rounded-lg shadow-xl border-4 border-white" />
-                          <Skeleton className="mt-4 w-full h-10 rounded" />
-                          <Skeleton className="mt-4 w-full h-24 rounded-lg" />
-                      </div>
-                      <div className="flex-1 pt-4 md:pt-12 text-center md:text-left">
-                          <Skeleton className="h-10 w-3/4 mb-4 mx-auto md:mx-0" />
-                          <Skeleton className="h-6 w-48 mb-6 mx-auto md:mx-0" />
-                          <div className="flex justify-center md:justify-start gap-4 mb-6">
-                              <Skeleton className="h-8 w-24 rounded-full" />
-                              <Skeleton className="h-8 w-32 rounded-full" />
-                              <Skeleton className="h-8 w-20 rounded-full" />
-                          </div>
-                          <div className="bg-white dark:bg-[#1a1b26] p-6 rounded-xl shadow-sm border mb-6">
-                              <Skeleton className="h-5 w-32 mb-4" />
-                              <Skeleton className="h-4 w-full mb-2" />
-                              <Skeleton className="h-4 w-full mb-2" />
-                              <Skeleton className="h-4 w-2/3" />
-                          </div>
-                          <div className="bg-white dark:bg-[#1a1b26] rounded-xl shadow-sm border mb-6 overflow-hidden">
-                              <div className="p-4 border-b bg-slate-50 dark:bg-[#0f1016]">
-                                  <Skeleton className="h-5 w-48" />
-                              </div>
-                              <div className="p-4 space-y-4">
-                                  {[1, 2, 3, 4, 5].map(i => (
-                                      <div key={i} className="flex justify-between items-center">
-                                          <Skeleton className="h-4 w-1/2" />
-                                          <Skeleton className="h-4 w-24" />
-                                      </div>
-                                  ))}
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      );
+      return <LoadingScreen />;
   }
   
   if (!novel) return <div className="p-12 text-center">Không tìm thấy truyện.</div>;
