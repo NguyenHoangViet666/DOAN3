@@ -245,7 +245,7 @@ export const Home: React.FC = () => {
                    </button>
                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
                        {featuredNovels.map((_, idx) => (
-                           <button key={idx} onClick={() => setCurrentSlide(idx)} className={`w-2.5 h-2.5 rounded-full transition-all ${idx === currentSlide ? 'bg-white w-8' : 'bg-white/40 hover:bg-white/60'}`} />
+                           <button key={idx} onClick={() => setCurrentSlide(idx)} className={`h-2.5 rounded-full transition-all duration-300 ${idx === currentSlide ? 'bg-white w-8' : 'w-2.5 bg-white/40 hover:bg-white/60'}`} />
                        ))}
                    </div>
                </>
