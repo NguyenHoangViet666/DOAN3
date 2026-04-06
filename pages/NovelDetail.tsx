@@ -414,7 +414,7 @@ export const NovelDetail: React.FC = () => {
                                                         <Link to={`/novel/${novel.id}/chapter/${chapter.id}`} className="block px-8 py-4 w-full h-full flex items-center justify-between">
                                                             <div className="flex flex-col sm:flex-row sm:items-center truncate mr-10 flex-1">
                                                                 <span className="text-slate-700 dark:text-slate-200 font-bold group-hover:text-indigo-700 group-hover:translate-x-2 transition-all duration-300 mr-2">
-                                                                    Chương {displayIndex}: {chapter.displayTitle}
+                                                                    {chapter.displayTitle}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center text-xs font-semibold text-slate-400 dark:text-slate-500 flex-shrink-0 gap-4">
