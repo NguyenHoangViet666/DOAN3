@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getChapterDetail, getChapters, getNovelById, updateChapter, deleteChapter } from '../services/dbService';
 import { Chapter, Novel, Role, ReadingHistoryItem } from '../types';
-import { Loader2, ChevronLeft, ChevronRight, List, Home, Edit, Save, X, Trash2, AlignLeft, Settings, Type, Moon, Sun, Coffee, ArrowUp } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, List, Home, Edit, Save, X, Trash2, AlignLeft, Settings, Type, Moon, Sun, Coffee, ArrowUp, Info, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { RichTextEditor } from '../components/RichTextEditor';
@@ -28,6 +28,7 @@ export const ChapterDetail: React.FC = () => {
 
     // Reading Settings State
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [readSettings, setReadSettings] = useState({
         theme: 'light', // light, dark, sepia
         fontSize: 20,
@@ -427,6 +428,81 @@ export const ChapterDetail: React.FC = () => {
                     </div>
                 </>
             )}
+
+            {/* LEFT TOC SIDEBAR */}
+            {isSidebarOpen && (
+                <>
+                    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity animate-fadeIn" onClick={() => setIsSidebarOpen(false)}></div>
+                    <div className={`fixed top-0 left-0 h-full w-[280px] md:w-[320px] ${currentTheme.bg} z-[60] shadow-2xl border-r ${currentTheme.border} flex flex-col animate-[slideRight_0.3s_ease-out]`}>
+                        <div className={`p-4 border-b flex justify-between items-center bg-black/5 ${currentTheme.border}`}>
+                            <h3 className="font-bold text-lg flex items-center"><List className="w-5 h-5 mr-2 opacity-70"/> Mục lục</h3>
+                            <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-black/10 rounded-full transition-colors"><X className="w-5 h-5"/></button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-2" style={{ scrollbarWidth: 'thin' }}>
+                            {allChapters.map(chap => {
+                                const isActive = chap.id === chapterId;
+                                return (
+                                    <button
+                                        key={chap.id}
+                                        onClick={() => {
+                                            setIsSidebarOpen(false);
+                                            navigate(`/novel/${novelId}/chapter/${chap.id}`);
+                                        }}
+                                        className={`w-full text-left p-3 rounded-xl mb-1 transition-all ${isActive ? 'bg-primary text-white font-bold shadow-md shadow-primary/30 scale-[1.02]' : 'hover:bg-black/5'}`}
+                                    >
+                                        <div className={`text-sm line-clamp-2 ${isActive ? 'text-white' : ''}`}>{chap.title}</div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* FLOATING ACTION TOOLBAR */}
+            <div className={`fixed right-3 md:right-8 bottom-8 md:bottom-auto md:top-1/2 md:-translate-y-1/2 z-40 flex flex-col gap-1 md:gap-2 p-1 md:p-1.5 rounded-[1.25rem] border backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-colors duration-300 animate-scaleIn ${currentTheme.nav} ${currentTheme.border}`}>
+                <button 
+                    onClick={() => navigateChapter('prev')}
+                    disabled={!hasPrev}
+                    className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-xl transition-all ${hasPrev ? 'hover:bg-black/5 hover:scale-110 active:scale-95 opacity-80 hover:opacity-100' : 'opacity-20 cursor-not-allowed'}`}
+                    title="Chương trước"
+                >
+                    <ChevronsLeft className="w-6 h-6" />
+                </button>
+                <div className={`w-6 h-px mx-auto my-0.5 border-t opacity-30 ${currentTheme.border}`}></div>
+                
+                <Link 
+                    to={`/novel/${novel.id}`}
+                    className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-xl transition-all hover:bg-black/5 hover:scale-110 active:scale-95 opacity-80 hover:opacity-100 group"
+                    title="Về Trang Truyện"
+                >
+                    <Home className="w-5 h-5 group-hover:text-primary transition-colors" />
+                </Link>
+                <button 
+                    onClick={() => setIsSettingsOpen(true)}
+                    className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-xl transition-all hover:bg-black/5 hover:scale-110 active:scale-95 opacity-80 hover:opacity-100 group"
+                    title="Cài đặt hiển thị"
+                >
+                    <Type className="w-5 h-5 group-hover:text-primary transition-colors font-bold" />
+                </button>
+                <button 
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-xl transition-all hover:bg-black/5 hover:scale-110 active:scale-95 opacity-80 hover:opacity-100 group"
+                    title="Hiển thị Mục Lục"
+                >
+                    <Info className="w-5 h-5 group-hover:text-primary transition-colors" />
+                </button>
+
+                <div className={`w-6 h-px mx-auto my-0.5 border-t opacity-30 ${currentTheme.border}`}></div>
+                <button 
+                    onClick={() => navigateChapter('next')}
+                    disabled={!hasNext}
+                    className={`w-10 h-10 md:w-11 md:h-11 flex items-center justify-center rounded-xl transition-all ${hasNext ? 'hover:bg-black/5 hover:scale-110 active:scale-95 opacity-80 hover:opacity-100' : 'opacity-20 cursor-not-allowed'}`}
+                    title="Chương sau"
+                >
+                    <ChevronsRight className="w-6 h-6" />
+                </button>
+            </div>
 
             {/* EDIT MODAL */}
             {isEditOpen && (
