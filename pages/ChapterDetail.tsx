@@ -1,9 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getChapterDetail, getChapters, getNovelById, updateChapter, deleteChapter } from '../services/dbService';
 import { Chapter, Novel, Role, ReadingHistoryItem } from '../types';
-import { Loader2, ChevronLeft, ChevronRight, List, Home, Edit, Save, X, Trash2, AlignLeft, Settings, Type, Moon, Sun, Coffee, ArrowUp, Info, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, ChevronDown, List, Home, Edit, Save, X, Trash2, AlignLeft, Settings, Type, Moon, Sun, Coffee, ArrowUp, Info, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 import { RichTextEditor } from '../components/RichTextEditor';
@@ -35,6 +35,9 @@ export const ChapterDetail: React.FC = () => {
         fontFamily: 'serif', // serif, sans
         lineHeight: 1.8,
     });
+
+    // Sidebar Accordion State
+    const [activeVolume, setActiveVolume] = useState<string>('');
 
     const [scrollProgress, setScrollProgress] = useState(0);
     const [showScrollTop, setShowScrollTop] = useState(false);
@@ -134,6 +137,45 @@ export const ChapterDetail: React.FC = () => {
         // Scroll to top when chapter changes
         window.scrollTo(0, 0);
     }, [novelId, chapterId]);
+
+    // Active volume auto-open
+    useEffect(() => {
+        if (chapter) {
+            const match = chapter.title.match(/^\[(.*?)\]\s*(.*)$/);
+            const volName = match ? match[1].trim() : "Danh sách chương";
+            const normalizedKey = volName.toLowerCase().replace(/\s+/g, ' ').trim();
+            setActiveVolume(normalizedKey);
+        }
+    }, [chapter]);
+
+    // Group chapters by volume
+    const groupedVolumes = useMemo(() => {
+        if (allChapters.length === 0) return [];
+        
+        const groups: { key: string; volumeName: string; chapters: (Chapter & { displayTitle: string })[] }[] = [];
+        const volumeMap = new Map<string, (Chapter & { displayTitle: string })[]>();
+
+        allChapters.forEach(chap => {
+            const match = chap.title.match(/^\[(.*?)\]\s*(.*)$/);
+            let volName = "Danh sách chương";
+            let dTitle = chap.title;
+            
+            if (match) {
+                volName = match[1].trim();
+                dTitle = match[2].trim();
+            }
+
+            const normalizedKey = volName.toLowerCase().replace(/\s+/g, ' ').trim();
+
+            if (!volumeMap.has(normalizedKey)) {
+                volumeMap.set(normalizedKey, []);
+                groups.push({ key: normalizedKey, volumeName: volName, chapters: volumeMap.get(normalizedKey)! });
+            }
+            volumeMap.get(normalizedKey)!.push({ ...chap, displayTitle: dTitle });
+        });
+
+        return groups;
+    }, [allChapters]);
 
     const navigateChapter = (direction: 'next' | 'prev') => {
         const currentIndex = allChapters.findIndex(c => c.id === chapterId);
@@ -439,19 +481,38 @@ export const ChapterDetail: React.FC = () => {
                             <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-black/10 rounded-full transition-colors"><X className="w-5 h-5"/></button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-2" style={{ scrollbarWidth: 'thin' }}>
-                            {allChapters.map(chap => {
-                                const isActive = chap.id === chapterId;
+                            {groupedVolumes.map(group => {
+                                const isActive = activeVolume === group.key;
                                 return (
-                                    <button
-                                        key={chap.id}
-                                        onClick={() => {
-                                            setIsSidebarOpen(false);
-                                            navigate(`/novel/${novelId}/chapter/${chap.id}`);
-                                        }}
-                                        className={`w-full text-left p-3 rounded-xl mb-1 transition-all ${isActive ? 'bg-primary text-white font-bold shadow-md shadow-primary/30 scale-[1.02]' : 'hover:bg-black/5'}`}
-                                    >
-                                        <div className={`text-sm line-clamp-2 ${isActive ? 'text-white' : ''}`}>{chap.title}</div>
-                                    </button>
+                                    <div key={group.key} className="mb-2">
+                                        <button
+                                            onClick={() => setActiveVolume(isActive ? '' : group.key)}
+                                            className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${isActive ? 'bg-black/5 dark:bg-white/10 text-primary' : 'hover:bg-black/5 dark:hover:bg-white/5'}`}
+                                        >
+                                            <span className="font-bold text-[13px] uppercase tracking-wider line-clamp-2 text-left pr-2">{group.volumeName}</span>
+                                            <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isActive ? 'rotate-180' : ''}`} />
+                                        </button>
+                                        
+                                        <div className={`overflow-hidden transition-all duration-300 ${isActive ? 'max-h-[2000px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                                            <div className="pl-3 pr-1 py-1 space-y-1 border-l-2 border-slate-200 dark:border-slate-800 ml-3">
+                                                {group.chapters.map(chap => {
+                                                    const isCurrent = chap.id === chapterId;
+                                                    return (
+                                                        <button
+                                                            key={chap.id}
+                                                            onClick={() => {
+                                                                setIsSidebarOpen(false);
+                                                                navigate(`/novel/${novelId}/chapter/${chap.id}`);
+                                                            }}
+                                                            className={`w-full text-left px-3 py-2.5 rounded-lg transition-all ${isCurrent ? 'bg-primary text-white font-bold shadow-md shadow-primary/30 scale-[1.02]' : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-80 hover:opacity-100'}`}
+                                                        >
+                                                            <div className={`text-sm line-clamp-2 ${isCurrent ? 'text-white' : ''}`}>{chap.displayTitle}</div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
                                 );
                             })}
                         </div>
