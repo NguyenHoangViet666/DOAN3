@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getChapterDetail, getChapters, getNovelById, updateChapter, deleteChapter } from '../services/dbService';
-import { Chapter, Novel, Role } from '../types';
+import { Chapter, Novel, Role, ReadingHistoryItem } from '../types';
 import { Loader2, ChevronLeft, ChevronRight, List, Home, Edit, Save, X, Trash2, AlignLeft, Settings, Type, Moon, Sun, Coffee, ArrowUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
@@ -98,6 +98,31 @@ export const ChapterDetail: React.FC = () => {
                 // Fetch list for navigation
                 const list = await getChapters(novelId);
                 setAllChapters(list);
+
+                // Save to Reading History LocalStorage
+                if (chapData && novelData) {
+                    try {
+                        const savedHistory = localStorage.getItem('readingHistory');
+                        let historyList: ReadingHistoryItem[] = savedHistory ? JSON.parse(savedHistory) : [];
+                        
+                        // Remove if already exists so we can bump it to the front
+                        historyList = historyList.filter(item => item.novelId !== novelId);
+                        
+                        historyList.unshift({
+                            novelId: novelId,
+                            novelTitle: novelData.title,
+                            novelCoverUrl: novelData.coverUrl,
+                            chapterId: chapterId,
+                            chapterTitle: chapData.title,
+                            timestamp: Date.now()
+                        });
+                        
+                        // Keep max 10 items
+                        localStorage.setItem('readingHistory', JSON.stringify(historyList.slice(0, 10)));
+                    } catch (err) {
+                        console.error('Lỗi khi lưu lịch sử đọc:', err);
+                    }
+                }
             } catch (e) {
                 console.error(e);
             } finally {

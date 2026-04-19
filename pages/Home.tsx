@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Novel, NovelType, NovelGenre } from '../types';
+import { Novel, NovelType, NovelGenre, ReadingHistoryItem } from '../types';
 import { getPublicNovels } from '../services/dbService';
-import { Search, Star, Loader2, ChevronLeft, ChevronRight, Sparkles, Zap, Globe, PenTool, TrendingUp, BookOpen, Flame, CheckCircle, User } from 'lucide-react';
+import { Search, Star, Loader2, ChevronLeft, ChevronRight, Sparkles, Zap, Globe, PenTool, TrendingUp, BookOpen, Flame, CheckCircle, User, Clock, X } from 'lucide-react';
 import { LoadingScreen } from '../components/LoadingScreen';
 
 // Helper: Seeded Random Shuffle
@@ -78,6 +78,7 @@ export const Home: React.FC = () => {
   const [topRatedNovels, setTopRatedNovels] = useState<Novel[]>([]);
   const [spotlightNovels, setSpotlightNovels] = useState<Novel[]>([]);
   const [spotlightGenre, setSpotlightGenre] = useState<string>('');
+  const [readingHistory, setReadingHistory] = useState<ReadingHistoryItem[]>([]);
 
   // Tabs & Pagination for "Latest Updates"
   const [activeTab, setActiveTab] = useState<NovelType>(NovelType.TRANSLATED);
@@ -160,6 +161,24 @@ export const Home: React.FC = () => {
     };
     fetchData();
   }, []);
+
+  // Load Reading History from Client Local Storage
+  useEffect(() => {
+     try {
+         const history = localStorage.getItem('readingHistory');
+         if (history) setReadingHistory(JSON.parse(history));
+     } catch(e) {
+         console.warn("Could not parse reading history", e);
+     }
+  }, []);
+
+  const removeHistoryItem = (novelId: string) => {
+     try {
+         const newHistory = readingHistory.filter(item => item.novelId !== novelId);
+         setReadingHistory(newHistory);
+         localStorage.setItem('readingHistory', JSON.stringify(newHistory));
+     } catch (e) {}
+  };
 
   // Auto-slide effect
   useEffect(() => {
@@ -326,6 +345,41 @@ export const Home: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* LEFT COLUMN: DAILY RECOMMENDATIONS */}
             <div className="lg:col-span-2 space-y-12 md:space-y-16">
+                
+                {/* NEW: CONTINUE READING (LOCAL HISTORY) */}
+                {readingHistory.length > 0 && (
+                    <section className="animate-fadeIn">
+                        <div className="flex items-center justify-between mb-4 md:mb-6 mt-1">
+                            <h2 className="text-lg md:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center">
+                                <Clock className="w-5 h-5 md:w-6 md:h-6 mr-2 text-indigo-500"/>
+                                Đang Đọc Dở
+                            </h2>
+                        </div>
+                        <div className="flex overflow-x-auto gap-4 pb-2 px-1 scrollbar-hide snap-x">
+                            {readingHistory.map(item => (
+                                <div key={item.novelId} className="flex-shrink-0 w-[240px] md:w-[280px] bg-white dark:bg-[#1a1b26] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg dark:shadow-none hover:border-indigo-400/50 transition-all relative overflow-hidden group snap-start">
+                                    <button 
+                                        onClick={(e) => { e.preventDefault(); removeHistoryItem(item.novelId); }} 
+                                        className="absolute top-2 right-2 bg-black/60 hover:bg-rose-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10 shadow-sm"
+                                        title="Xóa khỏi lịch sử"
+                                    >
+                                        <X className="w-3.5 h-3.5"/>
+                                    </button>
+                                    <Link to={`/novel/${item.novelId}/chapter/${item.chapterId}`} className="flex items-center p-3 gap-3 h-full">
+                                        <div className="w-14 h-18 rounded-xl overflow-hidden shrink-0 border border-slate-100 dark:border-slate-800">
+                                            <img src={item.novelCoverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt=""/>
+                                        </div>
+                                        <div className="flex flex-col flex-1 min-w-0 justify-center">
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[13px] md:text-sm line-clamp-1 mb-1 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">{item.novelTitle}</h4>
+                                            <div className="text-[11px] md:text-xs text-indigo-600 dark:text-indigo-400 font-medium line-clamp-1 mb-auto bg-indigo-50 dark:bg-indigo-500/10 self-start px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-500/20">{item.chapterTitle}</div>
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 mt-2.5 font-bold uppercase tracking-wider flex items-center">Đọc tiếp ngay <ChevronRight className="w-3 h-3 ml-0.5"/></span>
+                                        </div>
+                                    </Link>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
                 {/* SECTION 2: DAILY TRANSLATED RECOMMENDATION */}
                 {dailyTranslated.length > 0 && (
                     <section className="animate-fadeIn">
