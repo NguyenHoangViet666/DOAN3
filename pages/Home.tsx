@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Novel, NovelType } from '../types';
+import { Novel, NovelType, NovelGenre } from '../types';
 import { getPublicNovels } from '../services/dbService';
-import { Search, Star, Loader2, ChevronLeft, ChevronRight, Sparkles, Zap, Globe, PenTool, TrendingUp, BookOpen, Flame } from 'lucide-react';
+import { Search, Star, Loader2, ChevronLeft, ChevronRight, Sparkles, Zap, Globe, PenTool, TrendingUp, BookOpen, Flame, CheckCircle, User } from 'lucide-react';
 import { LoadingScreen } from '../components/LoadingScreen';
 
 // Helper: Seeded Random Shuffle
@@ -73,6 +73,12 @@ export const Home: React.FC = () => {
   const [topTranslated, setTopTranslated] = useState<Novel[]>([]);
   const [topOriginal, setTopOriginal] = useState<Novel[]>([]);
 
+  // New Content Sections
+  const [completedNovels, setCompletedNovels] = useState<Novel[]>([]);
+  const [topRatedNovels, setTopRatedNovels] = useState<Novel[]>([]);
+  const [spotlightNovels, setSpotlightNovels] = useState<Novel[]>([]);
+  const [spotlightGenre, setSpotlightGenre] = useState<string>('');
+
   // Tabs & Pagination for "Latest Updates"
   const [activeTab, setActiveTab] = useState<NovelType>(NovelType.TRANSLATED);
   const [currentPage, setCurrentPage] = useState(1);
@@ -126,6 +132,25 @@ export const Home: React.FC = () => {
             return ratingB - ratingA;
         });
         setTopOriginal(sortedOriginal.slice(0, 5)); // Lấy top 5
+
+        // --- NEW SECTIONS DATA ---
+        // 5. Truyen Da Hoan Thanh (Binge Section)
+        setCompletedNovels(data.filter(n => n.status === 'Đã hoàn thành').slice(0, 4));
+
+        // 6. Top Rated (Hall of Fame). All novels sorted globally by rating
+        const allSortedRating = [...data].sort((a, b) => {
+            const ratingA = a.ratingCount ? (a.ratingSum! / a.ratingCount) : 0;
+            const ratingB = b.ratingCount ? (b.ratingSum! / b.ratingCount) : 0;
+            return ratingB - ratingA;
+        });
+        setTopRatedNovels(allSortedRating.slice(0, 4)); // Show 4 top rated in small cards
+
+        // 7. Genre Spotlight
+        const spotlightGenres: NovelGenre[] = [NovelGenre.ACTION, NovelGenre.ROMANCE, NovelGenre.FANTASY, NovelGenre.COMEDY, NovelGenre.ISEKAI];
+        const seedGenreIndex = new Date().getDate() % spotlightGenres.length;
+        const currentSpotlightGenre = spotlightGenres[seedGenreIndex];
+        setSpotlightGenre(currentSpotlightGenre);
+        setSpotlightNovels(data.filter(n => n.genres && n.genres.includes(currentSpotlightGenre)).slice(0, 8));
 
       } catch (error) {
         console.error("Failed to fetch novels", error);
@@ -327,7 +352,7 @@ export const Home: React.FC = () => {
                 )}
 
                 {/* PROMO BANNER 1 */}
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 p-8 shadow-xl shadow-purple-500/20 group cursor-pointer animate-fadeIn border border-white/20">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 p-8 shadow-xl shadow-purple-500/20 group cursor-pointer animate-fadeIn border border-white/20 mb-12 md:mb-16">
                     <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
                     <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
                     <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between">
@@ -344,6 +369,54 @@ export const Home: React.FC = () => {
                     </div>
                 </div>
 
+                {/* NEW: GENRE SPOTLIGHT (Asymmetrical Layout) */}
+                {spotlightNovels.length >= 2 && (
+                    <section className="animate-fadeIn mb-12 md:mb-16">
+                        <div className="flex items-center justify-between mb-4 md:mb-6">
+                            <h2 className="text-lg md:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center">
+                                <Flame className="w-5 h-5 md:w-6 md:h-6 mr-2 text-rose-500"/>
+                                Tiêu Điểm: <span className="text-primary dark:text-purple-400 ml-2">{spotlightGenre}</span>
+                            </h2>
+                            <Link to={`/search?q=${encodeURIComponent(spotlightGenre)}`} className="text-xs md:text-sm font-medium text-primary dark:text-purple-400 hover:underline flex items-center">
+                                Xem thêm <ChevronRight className="w-3 h-3 md:w-4 md:h-4"/>
+                            </Link>
+                        </div>
+                        <div className="flex flex-col md:flex-row gap-4 h-auto md:h-[350px]">
+                            {/* Left Hero Card */}
+                            <Link to={`/novel/${spotlightNovels[0].id}`} className="flex-1 md:w-1/2 h-[300px] md:h-full rounded-2xl overflow-hidden relative group border border-slate-200 dark:border-slate-800 shadow-xl shadow-rose-500/5">
+                                <img src={spotlightNovels[0].coverUrl} alt={spotlightNovels[0].title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10"></div>
+                                <div className="absolute bottom-0 left-0 right-0 p-6">
+                                    <div className="flex items-center text-yellow-400 text-xs font-bold mb-2">
+                                        <Star className="w-3 h-3 fill-yellow-400 mr-1"/> {(spotlightNovels[0].ratingCount ? spotlightNovels[0].ratingSum! / spotlightNovels[0].ratingCount : 9.9).toFixed(1)}
+                                    </div>
+                                    <h3 className="text-2xl font-extrabold text-white mb-2 line-clamp-2 md:line-clamp-1">{spotlightNovels[0].title}</h3>
+                                    <p className="text-slate-300 text-xs line-clamp-2 mb-4 font-light leading-relaxed">{spotlightNovels[0].description}</p>
+                                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-bold text-white border border-white/30 truncate max-w-[150px]"><PenTool className="w-3 h-3 inline pb-0.5 mr-1"/>{spotlightNovels[0].author}</span>
+                                </div>
+                            </Link>
+                            
+                            {/* Right List */}
+                            <div className="flex-1 md:w-1/2 flex flex-col gap-4 h-auto md:h-full overflow-y-auto pr-1 sm:pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
+                                {spotlightNovels.slice(1, 8).map((novel, idx) => (
+                                    <Link key={novel.id} to={`/novel/${novel.id}`} className="shrink-0 h-[100px] md:h-[110px] rounded-2xl bg-white dark:bg-[#1a1b26] border border-slate-100 dark:border-slate-800/80 p-2.5 flex gap-4 transition-all hover:-translate-x-1 hover:shadow-lg hover:border-rose-300/50 dark:hover:border-rose-700/50 group">
+                                        <div className="w-[70px] md:w-20 h-full overflow-hidden rounded-xl shrink-0">
+                                            <img src={novel.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt=""/>
+                                        </div>
+                                        <div className="flex flex-col justify-center py-1 pr-2 w-full">
+                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm line-clamp-2 leading-snug group-hover:text-rose-500 dark:group-hover:text-rose-400 transition-colors mb-2">{novel.title}</h4>
+                                            <div className="flex items-center justify-between w-full mt-auto">
+                                                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[100px]"><User className="w-3 h-3 inline pb-0.5 mr-1"/>{novel.author}</span>
+                                                <span className="text-[10px] py-0.5 px-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded font-medium border border-slate-200 dark:border-slate-700">{novel.type}</span>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
+
                 {/* SECTION 3: DAILY ORIGINAL RECOMMENDATION */}
                 {dailyOriginal.length > 0 && (
                     <section className="animate-fadeIn">
@@ -351,9 +424,6 @@ export const Home: React.FC = () => {
                             <h2 className="text-lg md:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center">
                                 <PenTool className="w-5 h-5 md:w-6 md:h-6 mr-2 text-green-500"/>
                                 Đề Cử Sáng Tác
-                                <span className="ml-2 md:ml-3 text-[10px] md:text-xs font-normal text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-2 py-1 rounded-full flex items-center border border-slate-200 dark:border-slate-700">
-                                    <Sparkles className="w-3 h-3 mr-1 text-yellow-500"/> Hôm nay
-                                </span>
                             </h2>
                             <Link to="/category/original" className="text-xs md:text-sm font-medium text-primary dark:text-purple-400 hover:underline flex items-center whitespace-nowrap">
                                 Xem tất cả <ChevronRight className="w-3 h-3 md:w-4 md:h-4"/>
@@ -368,10 +438,77 @@ export const Home: React.FC = () => {
                         </div>
                     </section>
                 )}
+
+                {/* NEW: COMPLETED NOVELS (BINGE SECTION) */}
+                {completedNovels.length > 0 && (
+                    <section className="animate-fadeIn">
+                        <div className="flex items-center justify-between mb-4 md:mb-6">
+                            <h2 className="text-lg md:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center">
+                                <CheckCircle className="w-5 h-5 md:w-6 md:h-6 mr-2 text-emerald-500"/>
+                                Truyện Đã Hoàn Thành
+                            </h2>
+                            <Link to={`/search?q=${encodeURIComponent('Đã hoàn thành')}`} className="text-xs md:text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline flex items-center">
+                                Cày ngay <ChevronRight className="w-3 h-3 md:w-4 md:h-4"/>
+                            </Link>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+                            {completedNovels.map(novel => (
+                                <Link key={novel.id} to={`/novel/${novel.id}`} className="flex bg-white dark:bg-[#1a1b26] rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-[0_8px_30px_rgb(16,185,129,0.12)] hover:border-emerald-500/40 transition-all duration-300 group h-[140px]">
+                                    <div className="w-[100px] shrink-0 relative overflow-hidden">
+                                        <img src={novel.coverUrl} alt={novel.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+                                        <div className="absolute top-0 left-0 bg-emerald-500 text-white text-[9px] px-2 py-0.5 rounded-br-lg font-bold uppercase tracking-wider shadow">FULL</div>
+                                    </div>
+                                    <div className="p-3.5 md:p-4 flex flex-col flex-1 min-w-0 bg-gradient-to-r from-emerald-50/0 to-emerald-50/30 dark:to-emerald-900/5">
+                                        <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 mb-1 line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{novel.title}</h3>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 md:line-clamp-3 mb-2 flex-1 leading-relaxed font-light">
+                                            {novel.description}
+                                        </p>
+                                        <div className="flex items-center justify-between mt-auto">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase truncate max-w-[80px]"><PenTool className="w-3 h-3 inline pb-0.5 mr-1"/> {novel.author}</span>
+                                            <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-md text-[10px] font-bold border border-emerald-100 dark:border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-white transition-colors">Đọc luôn</span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </div>
 
             {/* RIGHT COLUMN: TOP NOVELS */}
             <div className="lg:col-span-1 space-y-8 sticky top-24">
+                
+                {/* NEW: HALL OF FAME RATING */}
+                {topRatedNovels.length > 0 && (
+                    <div className="bg-gradient-to-b from-slate-900 to-slate-950 dark:from-[#13141c] dark:to-[#0f1016] rounded-3xl shadow-xl shadow-slate-900/20 border border-slate-800 p-6 overflow-hidden relative group">
+                        <div className="absolute top-0 right-0 w-40 h-40 bg-yellow-500/10 rounded-bl-full blur-2xl pointer-events-none"></div>
+                        <div className="flex items-center mb-6 pb-4 border-b border-white/5 relative z-10">
+                            <Star className="w-5 h-5 md:w-6 md:h-6 mr-2 text-yellow-400 fill-yellow-400 animate-pulse"/>
+                            <h2 className="text-lg md:text-xl font-extrabold text-white">Đánh Giá Đỉnh Cao</h2>
+                        </div>
+                        <div className="space-y-4 relative z-10">
+                            {topRatedNovels.map((novel, index) => {
+                                const score = novel.ratingCount ? (novel.ratingSum! / novel.ratingCount).toFixed(1) : '9.9';
+                                return (
+                                    <Link key={novel.id} to={`/novel/${novel.id}`} className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-2.5 rounded-2xl transition-colors border border-white/5 hover:border-yellow-500/30 group/ticket">
+                                        <div className="w-12 h-16 shrink-0 rounded-lg overflow-hidden border border-white/10 relative">
+                                            <img src={novel.coverUrl} className="w-full h-full object-cover group-hover/ticket:scale-110 transition-transform duration-500" alt=""/>
+                                            <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black/80 to-transparent"></div>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-sm font-bold text-slate-200 line-clamp-1 group-hover/ticket:text-yellow-400 transition-colors drop-shadow-md">{novel.title}</h3>
+                                            <span className="text-[11px] text-slate-400 flex items-center mt-1 truncate"><PenTool className="w-3 h-3 mr-1 opacity-70"/> {novel.author}</span>
+                                        </div>
+                                        <div className="shrink-0 flex flex-col items-center justify-center bg-yellow-500/10 px-3 py-1.5 rounded-xl border border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.1)] group-hover/ticket:scale-110 group-hover/ticket:bg-yellow-500/20 transition-all">
+                                            <span className="text-yellow-400 font-black text-[13px] drop-shadow-sm">{score}</span>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
                 {[
                     { title: 'BXH Truyện Dịch', icon: <Globe className="w-6 h-6 mr-2 text-blue-500 fill-blue-500/20"/>, novels: topTranslated, path: '/category/translated' },
                     { title: 'BXH Sáng Tác', icon: <PenTool className="w-6 h-6 mr-2 text-green-500 fill-green-500/20"/>, novels: topOriginal, path: '/category/original' }
