@@ -202,8 +202,8 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Search Bar */}
-          <div className={`flex-1 flex items-center px-2 navbar-transition ${scrolled && isSearchFocused ? 'justify-start lg:ml-0' : 'justify-center lg:ml-6 lg:justify-end'}`}>
-            <div className={`w-full navbar-transition ${scrolled && isSearchFocused ? 'max-w-full' : 'max-w-lg lg:max-w-xs'}`}>
+          <div className={`flex-1 flex items-center px-2 navbar-transition justify-end mr-1 md:mr-4`}>
+            <div className={`w-full navbar-transition ${scrolled && isSearchFocused ? 'max-w-full' : 'max-w-lg lg:max-w-[450px] xl:max-w-[560px]'}`}>
               <label htmlFor="search" className="sr-only">Tìm kiếm</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

@@ -386,12 +386,14 @@ export const NovelDetail: React.FC = () => {
                     </div>
                     
                     {/* DESCRIPTION CARD */}
-                    <div className="bg-white/90 dark:bg-[#1a1b26]/90 backdrop-blur-xl p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-white mb-10 text-left transition-all duration-300 hover:shadow-2xl">
-                        <h3 className="font-extrabold text-xl mb-4 flex items-center text-slate-800 dark:text-slate-100"><BookOpen className="w-6 h-6 mr-3 text-indigo-500"/> Giới thiệu</h3>
-                        <p className="text-slate-700 dark:text-white whitespace-pre-wrap leading-loose font-medium text-[15px]">{novel.description}</p>
-                        <div className="mt-8 flex flex-wrap gap-2 pt-6 border-t border-slate-100">
+                    <div className="bg-white/90 dark:bg-[#1a1b26]/90 backdrop-blur-xl p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-white dark:border-slate-800 mb-10 text-left transition-all duration-300 flex flex-col">
+                        <h3 className="font-extrabold text-xl mb-4 flex items-center text-slate-800 dark:text-slate-100 shrink-0"><BookOpen className="w-6 h-6 mr-3 text-indigo-500"/> Giới thiệu</h3>
+                        <div className="overflow-y-auto max-h-[250px] md:max-h-[300px] pr-4 mt-2" style={{ scrollbarWidth: 'thin' }}>
+                            <p className="text-slate-700 dark:text-slate-200 whitespace-pre-wrap leading-loose font-medium text-[15px]">{novel.description}</p>
+                        </div>
+                        <div className="mt-6 flex flex-wrap gap-2 pt-6 border-t border-slate-100 dark:border-slate-800 shrink-0">
                             {novel.genres.map(g => (
-                                <span key={g} className="px-4 py-1.5 bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100 shadow-sm transition-transform hover:scale-105 cursor-default">{g}</span>
+                                <span key={g} className="px-4 py-1.5 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-500/10 dark:to-blue-500/10 text-indigo-700 dark:text-indigo-400 text-xs font-bold rounded-full border border-indigo-100 dark:border-indigo-500/20 shadow-sm cursor-default">{g}</span>
                             ))}
                         </div>
                     </div>

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getChapterDetail, getChapters, getNovelById, updateChapter, deleteChapter } from '../services/dbService';
 import { Chapter, Novel, Role, ReadingHistoryItem } from '../types';
@@ -177,7 +177,7 @@ export const ChapterDetail: React.FC = () => {
         return groups;
     }, [allChapters]);
 
-    const navigateChapter = (direction: 'next' | 'prev') => {
+    const navigateChapter = useCallback((direction: 'next' | 'prev') => {
         const currentIndex = allChapters.findIndex(c => c.id === chapterId);
         if (currentIndex === -1) return;
 
@@ -186,7 +186,23 @@ export const ChapterDetail: React.FC = () => {
         if (nextIndex >= 0 && nextIndex < allChapters.length) {
             navigate(`/novel/${novelId}/chapter/${allChapters[nextIndex].id}`);
         }
-    };
+    }, [allChapters, chapterId, novelId, navigate]);
+
+    // Keyboard Navigation
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (isEditOpen || document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+            
+            if (e.key === 'ArrowLeft') {
+                navigateChapter('prev');
+            } else if (e.key === 'ArrowRight') {
+                navigateChapter('next');
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [navigateChapter, isEditOpen]);
 
     const handleOpenEdit = () => {
         if (chapter) {
