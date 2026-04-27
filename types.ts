@@ -200,3 +200,12 @@ export interface Conversation {
     lastMessageAt: string;
     unreadCount: Record<string, number>; // { userId: count }
 }
+
+export interface ReadingHistoryItem {
+    novelId: string;
+    chapterId: string;
+    novelCoverUrl: string;
+    novelTitle: string;
+    chapterTitle: string;
+    timestamp?: number;
+}

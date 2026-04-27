@@ -214,7 +214,7 @@ export const Home: React.FC = () => {
                           key={slide.id}
                           src={slide.coverUrl} 
                           alt="" 
-                          className={`absolute inset-0 w-full h-[800px] object-cover filter blur-[100px] md:blur-[140px] transform scale-125 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-40 dark:opacity-30' : 'opacity-0'}`}
+                          className={`absolute inset-0 w-full h-[800px] object-cover filter blur-[40px] md:blur-[60px] transform scale-125 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? 'opacity-40 dark:opacity-30' : 'opacity-0'}`}
                       />
                   ))}
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-50/80 to-slate-50 dark:via-[#0f1016]/80 dark:to-[#0f1016]"></div>
@@ -223,7 +223,7 @@ export const Home: React.FC = () => {
       )}
 
       {/* Premium Web3 Noise */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] dark:opacity-[0.04] pointer-events-none mix-blend-overlay z-0"></div>
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02] dark:opacity-[0.03] pointer-events-none z-0"></div>
       
       <div className="flex-1 space-y-12 z-10">
       {/* SECTION 1: FEATURED BANNER */}
@@ -231,8 +231,8 @@ export const Home: React.FC = () => {
         <div className="relative bg-slate-950 text-white overflow-hidden h-[500px] md:h-[550px] rounded-b-[2rem] md:rounded-b-[3rem] shadow-[0_20px_50px_-15px_rgba(124,58,237,0.4)] mb-8 mx-auto max-w-[1920px] !mt-0 z-10 pt-[64px]">
            {/* Decorative background elements */}
            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-               <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary/30 blur-[120px] animate-pulse"></div>
-               <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-fuchsia-600/20 blur-[100px] animate-[pulse_4s_cubic-bezier(0.4,0,0.6,1)_infinite]"></div>
+               <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/30 to-transparent blur-2xl"></div>
+               <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-fuchsia-600/20 to-transparent blur-2xl"></div>
            </div>
            {featuredNovels.map((slide, index) => (
                <div 
@@ -298,8 +298,8 @@ export const Home: React.FC = () => {
       )}
 
       {/* LEFT/RIGHT AMBIENT ORBS FOR ULTRAWIDE SCREENS */}
-      <div className="fixed top-1/4 left-[-15%] w-[40%] h-[60vh] bg-primary/20 rounded-full blur-[200px] pointer-events-none hidden 2xl:block mix-blend-screen z-0"></div>
-      <div className="fixed top-2/3 right-[-15%] w-[35%] h-[50vh] bg-fuchsia-500/20 rounded-full blur-[180px] pointer-events-none hidden 2xl:block mix-blend-screen z-0"></div>
+      <div className="fixed top-1/4 left-[-15%] w-[40%] h-[60vh] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-primary/5 to-transparent rounded-full pointer-events-none hidden 2xl:block z-0"></div>
+      <div className="fixed top-2/3 right-[-15%] w-[35%] h-[50vh] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-fuchsia-500/10 via-fuchsia-500/5 to-transparent rounded-full pointer-events-none hidden 2xl:block z-0"></div>
       
       <div className="max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-12 md:space-y-16 relative z-10 2xl:px-16">
         
