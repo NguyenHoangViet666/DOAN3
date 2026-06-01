@@ -2,20 +2,31 @@
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
-import { Home } from './pages/Home';
-import { Login } from './pages/Login';
-import { CategoryPage } from './pages/CategoryPage';
-import { Profile } from './pages/Profile';
-import { NovelDetail } from './pages/NovelDetail';
-import { ChapterDetail } from './pages/ChapterDetail';
-import { SearchPage } from './pages/SearchPage';
-import { ForumPage } from './pages/ForumPage';
-import { PostDetail } from './pages/PostDetail';
-import { About } from './pages/About';
-import { Messages } from './pages/Messages';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 
+// Lazy load page components
+const Home = React.lazy(() => import('./pages/Home').then(m => ({ default: m.Home })));
+const Login = React.lazy(() => import('./pages/Login').then(m => ({ default: m.Login })));
+const CategoryPage = React.lazy(() => import('./pages/CategoryPage').then(m => ({ default: m.CategoryPage })));
+const Profile = React.lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const NovelDetail = React.lazy(() => import('./pages/NovelDetail').then(m => ({ default: m.NovelDetail })));
+const ChapterDetail = React.lazy(() => import('./pages/ChapterDetail').then(m => ({ default: m.ChapterDetail })));
+const SearchPage = React.lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
+const ForumPage = React.lazy(() => import('./pages/ForumPage').then(m => ({ default: m.ForumPage })));
+const PostDetail = React.lazy(() => import('./pages/PostDetail').then(m => ({ default: m.PostDetail })));
+const About = React.lazy(() => import('./pages/About').then(m => ({ default: m.About })));
+const Messages = React.lazy(() => import('./pages/Messages').then(m => ({ default: m.Messages })));
+
+// Premium loading fallback spinner for Suspense
+const LoadingSpinner = () => (
+  <div className="flex h-[80vh] w-full items-center justify-center bg-slate-50 dark:bg-[#0f1016]">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+      <p className="text-sm font-medium text-slate-400 dark:text-slate-500 animate-pulse">Đang tải trang...</p>
+    </div>
+  </div>
+);
 
 // Protected Route Wrapper
 const ProtectedUserRoute = ({ children }: { children?: React.ReactNode }) => {
@@ -34,38 +45,40 @@ function AppContent() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow bg-slate-50 dark:bg-[#0f1016]">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/about" element={<About />} />
-          
-          <Route path="/category/translated" element={<CategoryPage type="translated" />} />
-          <Route path="/category/original" element={<CategoryPage type="original" />} />
-          
-          <Route path="/novel/:novelId/chapter/:chapterId" element={<ChapterDetail />} />
-          <Route path="/novel/:id" element={<NovelDetail />} />
-          
-          <Route path="/search" element={<SearchPage />} />
+        <React.Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/about" element={<About />} />
+            
+            <Route path="/category/translated" element={<CategoryPage type="translated" />} />
+            <Route path="/category/original" element={<CategoryPage type="original" />} />
+            
+            <Route path="/novel/:novelId/chapter/:chapterId" element={<ChapterDetail />} />
+            <Route path="/novel/:id" element={<NovelDetail />} />
+            
+            <Route path="/search" element={<SearchPage />} />
 
-          {/* Forum Routes */}
-          <Route path="/forum/:id" element={<PostDetail />} />
-          <Route path="/forum" element={<ForumPage />} />
+            {/* Forum Routes */}
+            <Route path="/forum/:id" element={<PostDetail />} />
+            <Route path="/forum" element={<ForumPage />} />
 
-          {/* User Profiles */}
-          <Route path="/user/:userId" element={<Profile />} />
-          <Route path="/profile" element={
-            <ProtectedUserRoute>
-                <Profile />
-            </ProtectedUserRoute>
-          } />
-          
-          {/* Messaging */}
-          <Route path="/messages" element={
-            <ProtectedUserRoute>
-                <Messages />
-            </ProtectedUserRoute>
-          } />
-        </Routes>
+            {/* User Profiles */}
+            <Route path="/user/:userId" element={<Profile />} />
+            <Route path="/profile" element={
+              <ProtectedUserRoute>
+                  <Profile />
+              </ProtectedUserRoute>
+            } />
+            
+            {/* Messaging */}
+            <Route path="/messages" element={
+              <ProtectedUserRoute>
+                  <Messages />
+              </ProtectedUserRoute>
+            } />
+          </Routes>
+        </React.Suspense>
       </main>
 
 
