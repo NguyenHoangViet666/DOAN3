@@ -27,14 +27,17 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
     if (!isAdmin) return res.status(403).json({ message: 'Forbidden' });
 
     const [users] = await pool.query(`
-      SELECT u.id, u.username, u.email, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar 
+      SELECT u.id, u.username, u.email, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar,
+             GROUP_CONCAT(r.name) as roles
       FROM users u
+      LEFT JOIN user_roles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
+      GROUP BY u.id
       ORDER BY u.created_at DESC
     `);
 
     for (let user of (users as any[])) {
-      const [roles] = await pool.query('SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?', [user.id]);
-      user.roles = (roles as any[]).map(r => r.name);
+      user.roles = user.roles ? user.roles.split(',') : [];
     }
 
     res.json(users);

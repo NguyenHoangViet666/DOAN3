@@ -87,15 +87,18 @@ router.get('/requests', authenticateToken, requireRole(['Admin', 'SSR', 'Mod']),
         rr.status, 
         rr.created_at as createdAt,
         u.username, 
-        COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar 
+        COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar,
+        GROUP_CONCAT(r.name) as currentRoles
       FROM role_requests rr 
       JOIN users u ON rr.user_id = u.id 
+      LEFT JOIN user_roles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
+      GROUP BY rr.id
       ORDER BY rr.created_at DESC
     `);
     
     for (let request of (requests as any[])) {
-      const [roles] = await pool.query('SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?', [request.userId]);
-      request.currentRoles = (roles as any[]).map(r => r.name);
+      request.currentRoles = request.currentRoles ? request.currentRoles.split(',') : [];
     }
 
     res.json(requests);
@@ -147,10 +150,14 @@ router.get('/requests/user/:userId', authenticateToken, async (req, res) => {
     const [rows] = await pool.query(`
       SELECT 
         rr.id, rr.user_id as userId, u.username, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar,
-        rr.requested_role as requestedRole, rr.reason, rr.status, rr.created_at as createdAt
+        rr.requested_role as requestedRole, rr.reason, rr.status, rr.created_at as createdAt,
+        GROUP_CONCAT(r.name) as currentRoles
       FROM role_requests rr
       JOIN users u ON rr.user_id = u.id
+      LEFT JOIN user_roles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
       WHERE rr.user_id = ? AND rr.status = ? 
+      GROUP BY rr.id
       ORDER BY rr.created_at DESC LIMIT 1
     `, [req.params.userId, 'Chờ duyệt']);
     
@@ -160,10 +167,7 @@ router.get('/requests/user/:userId', authenticateToken, async (req, res) => {
     }
     
     const reqData = requests[0];
-    
-    // Get current roles for this user
-    const [roles] = await pool.query('SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?', [reqData.userId]);
-    reqData.currentRoles = (roles as any[]).map(r => r.name);
+    reqData.currentRoles = reqData.currentRoles ? reqData.currentRoles.split(',') : [];
     
     res.json(reqData);
   } catch (error) {

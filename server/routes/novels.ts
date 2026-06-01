@@ -48,30 +48,40 @@ router.get('/', async (req, res) => {
     const [novels] = await pool.query(query, params);
     const novelsList = novels as any[];
     
-    // Fetch genres for each novel
-    for (let novel of novelsList) {
-      const [genres] = await pool.query('SELECT genre FROM novel_genres WHERE novel_id = ?', [novel.id]);
-      novel.genres = (genres as any[]).map(g => g.genre);
-      
-      novel.coverUrl = novel.cover_url;
-      novel.uploaderId = novel.uploader_id;
-      novel.isPending = novel.is_pending;
-      novel.isFeatured = novel.is_featured;
-      novel.viewCount = novel.view_count;
-      novel.likeCount = novel.like_count;
-      novel.ratingCount = novel.rating_count;
-      novel.ratingSum = novel.rating_sum;
-      novel.createdAt = novel.created_at;
-      
-      delete novel.cover_url;
-      delete novel.uploader_id;
-      delete novel.is_pending;
-      delete novel.is_featured;
-      delete novel.view_count;
-      delete novel.like_count;
-      delete novel.rating_count;
-      delete novel.rating_sum;
-      delete novel.created_at;
+    if (novelsList.length > 0) {
+      const novelIds = novelsList.map(n => n.id);
+      const [genresRows] = await pool.query('SELECT novel_id, genre FROM novel_genres WHERE novel_id IN (?)', [novelIds]);
+      const genresMap: Record<string, string[]> = {};
+      for (const row of (genresRows as any[])) {
+        if (!genresMap[row.novel_id]) {
+          genresMap[row.novel_id] = [];
+        }
+        genresMap[row.novel_id].push(row.genre);
+      }
+
+      for (let novel of novelsList) {
+        novel.genres = genresMap[novel.id] || [];
+        
+        novel.coverUrl = novel.cover_url;
+        novel.uploaderId = novel.uploader_id;
+        novel.isPending = novel.is_pending;
+        novel.isFeatured = novel.is_featured;
+        novel.viewCount = novel.view_count;
+        novel.likeCount = novel.like_count;
+        novel.ratingCount = novel.rating_count;
+        novel.ratingSum = novel.rating_sum;
+        novel.createdAt = novel.created_at;
+        
+        delete novel.cover_url;
+        delete novel.uploader_id;
+        delete novel.is_pending;
+        delete novel.is_featured;
+        delete novel.view_count;
+        delete novel.like_count;
+        delete novel.rating_count;
+        delete novel.rating_sum;
+        delete novel.created_at;
+      }
     }
 
     res.json(novelsList);
@@ -273,34 +283,41 @@ router.get('/uploader/:uploaderId', async (req, res) => {
     );
     const novels = rows as any[];
     
-    // Fetch genres for each novel
-    for (const novel of novels) {
-      const [genreRows] = await pool.query(
-        'SELECT genre FROM novel_genres WHERE novel_id = ?',
-        [novel.id]
-      );
-      novel.genres = (genreRows as any[]).map(g => g.genre);
-      
-      // Convert snake_case to camelCase
-      novel.coverUrl = novel.cover_url;
-      novel.uploaderId = novel.uploader_id;
-      novel.isPending = novel.is_pending;
-      novel.isFeatured = novel.is_featured;
-      novel.viewCount = novel.view_count;
-      novel.likeCount = novel.like_count;
-      novel.ratingCount = novel.rating_count;
-      novel.ratingSum = novel.rating_sum;
-      novel.createdAt = novel.created_at;
-      
-      delete novel.cover_url;
-      delete novel.uploader_id;
-      delete novel.is_pending;
-      delete novel.is_featured;
-      delete novel.view_count;
-      delete novel.like_count;
-      delete novel.rating_count;
-      delete novel.rating_sum;
-      delete novel.created_at;
+    if (novels.length > 0) {
+      const novelIds = novels.map(n => n.id);
+      const [genresRows] = await pool.query('SELECT novel_id, genre FROM novel_genres WHERE novel_id IN (?)', [novelIds]);
+      const genresMap: Record<string, string[]> = {};
+      for (const row of (genresRows as any[])) {
+        if (!genresMap[row.novel_id]) {
+          genresMap[row.novel_id] = [];
+        }
+        genresMap[row.novel_id].push(row.genre);
+      }
+
+      for (const novel of novels) {
+        novel.genres = genresMap[novel.id] || [];
+        
+        // Convert snake_case to camelCase
+        novel.coverUrl = novel.cover_url;
+        novel.uploaderId = novel.uploader_id;
+        novel.isPending = novel.is_pending;
+        novel.isFeatured = novel.is_featured;
+        novel.viewCount = novel.view_count;
+        novel.likeCount = novel.like_count;
+        novel.ratingCount = novel.rating_count;
+        novel.ratingSum = novel.rating_sum;
+        novel.createdAt = novel.created_at;
+        
+        delete novel.cover_url;
+        delete novel.uploader_id;
+        delete novel.is_pending;
+        delete novel.is_featured;
+        delete novel.view_count;
+        delete novel.like_count;
+        delete novel.rating_count;
+        delete novel.rating_sum;
+        delete novel.created_at;
+      }
     }
     
     res.json(novels);

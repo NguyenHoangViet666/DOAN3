@@ -32,22 +32,43 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       ORDER BY c.last_message_at DESC
     `, [userId]);
 
-    for (let conv of (conversations as any[])) {
-      const [participants] = await pool.query(`
-        SELECT u.id, u.username, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar 
-        FROM conversation_participants cp 
-        JOIN users u ON cp.user_id = u.id 
-        WHERE cp.conversation_id = ?
-      `, [conv.id]);
+    const convList = conversations as any[];
+    if (convList.length > 0) {
+      const convIds = convList.map(c => c.id);
+      const [allParticipants] = await pool.query(`
+        SELECT cp.conversation_id as conversationId, u.id, u.username, 
+               COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar, 
+               cp.unread_count as unreadCount
+        FROM conversation_participants cp
+        JOIN users u ON cp.user_id = u.id
+        WHERE cp.conversation_id IN (?)
+      `, [convIds]);
       
-      conv.participants = (participants as any[]).map(p => p.id);
-      conv.participantInfo = participants;
+      const participantsMap: Record<string, any[]> = {};
+      const unreadMap: Record<string, Record<string, number>> = {};
       
-      // Build unreadCount object
-      const [unreadCounts] = await pool.query('SELECT user_id, unread_count FROM conversation_participants WHERE conversation_id = ?', [conv.id]);
-      conv.unreadCount = {};
-      for (let uc of (unreadCounts as any[])) {
-        conv.unreadCount[uc.user_id] = uc.unread_count;
+      for (const row of (allParticipants as any[])) {
+        const cId = row.conversationId;
+        if (!participantsMap[cId]) {
+          participantsMap[cId] = [];
+        }
+        participantsMap[cId].push({
+          id: row.id,
+          username: row.username,
+          avatar: row.avatar
+        });
+        
+        if (!unreadMap[cId]) {
+          unreadMap[cId] = {};
+        }
+        unreadMap[cId][row.id] = row.unreadCount;
+      }
+      
+      for (let conv of convList) {
+        const parts = participantsMap[conv.id] || [];
+        conv.participants = parts.map(p => p.id);
+        conv.participantInfo = parts;
+        conv.unreadCount = unreadMap[conv.id] || {};
       }
     }
 

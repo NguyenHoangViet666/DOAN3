@@ -25,15 +25,18 @@ router.get('/', async (req, res) => {
         p.view_count as viewCount, p.like_count as likeCount, 
         p.is_pinned as isPinned, p.pinned_until as pinnedUntil, 
         p.created_at as createdAt,
-        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar 
+        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar,
+        GROUP_CONCAT(r.name) as authorRoles
       FROM posts p 
       JOIN users u ON p.author_id = u.id 
+      LEFT JOIN user_roles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
+      GROUP BY p.id
       ORDER BY p.is_pinned DESC, p.created_at DESC
     `);
     
     for (let post of (posts as any[])) {
-      const [roles] = await pool.query('SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?', [post.author_id]);
-      post.authorRoles = (roles as any[]).map(r => r.name);
+      post.authorRoles = post.authorRoles ? post.authorRoles.split(',') : [];
     }
 
     res.json(posts);
@@ -73,17 +76,20 @@ router.get('/:id', async (req, res) => {
         p.view_count as viewCount, p.like_count as likeCount, 
         p.is_pinned as isPinned, p.pinned_until as pinnedUntil, 
         p.created_at as createdAt,
-        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar 
+        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar,
+        GROUP_CONCAT(r.name) as authorRoles
       FROM posts p 
       JOIN users u ON p.author_id = u.id 
+      LEFT JOIN user_roles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
       WHERE p.id = ?
+      GROUP BY p.id
     `, [req.params.id]);
     
     const post = (posts as any[])[0];
     if (!post) return res.status(404).json({ message: 'Post not found' });
 
-    const [roles] = await pool.query('SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?', [post.author_id]);
-    post.authorRoles = (roles as any[]).map(r => r.name);
+    post.authorRoles = post.authorRoles ? post.authorRoles.split(',') : [];
 
     res.json(post);
   } catch (error) {
@@ -100,16 +106,19 @@ router.get('/user/:userId', async (req, res) => {
         p.view_count as viewCount, p.like_count as likeCount, 
         p.is_pinned as isPinned, p.pinned_until as pinnedUntil, 
         p.created_at as createdAt,
-        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar 
+        u.username as authorName, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as authorAvatar,
+        GROUP_CONCAT(r.name) as authorRoles
       FROM posts p 
       JOIN users u ON p.author_id = u.id 
+      LEFT JOIN user_roles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
       WHERE p.author_id = ? 
+      GROUP BY p.id
       ORDER BY p.created_at DESC
     `, [req.params.userId]);
     
     for (let post of (posts as any[])) {
-      const [roles] = await pool.query('SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?', [post.authorId]);
-      post.authorRoles = (roles as any[]).map(r => r.name);
+      post.authorRoles = post.authorRoles ? post.authorRoles.split(',') : [];
     }
 
     res.json(posts);

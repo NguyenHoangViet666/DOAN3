@@ -5,7 +5,6 @@ import { getConversations, getMessages, sendMessage, markConversationAsRead, get
 import { Conversation, Message, User } from '../types';
 import { Loader2, Send, MessageSquare, ArrowLeft, Search, Image as ImageIcon, Smile, MoreHorizontal, Phone, Video, Info, CheckCircle, Clock, MoreVertical } from 'lucide-react';
 import { useNotification } from '../context/NotificationContext';
-import { format } from 'date-fns';
 
 const formatDate = (dateStr: any) => {
     if (!dateStr) return '';

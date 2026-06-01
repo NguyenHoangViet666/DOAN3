@@ -8,17 +8,13 @@ const router = Router();
 // Helper to fetch comments with replies and likes
 const fetchComments = async (query: string, params: any[]) => {
   const [comments] = await pool.query(query, params);
+  const commentList = comments as any[];
   
-  for (let comment of (comments as any[])) {
-    // Get roles
-    const [roles] = await pool.query('SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?', [comment.user_id]);
-    comment.roles = (roles as any[]).map(r => r.name);
-
-    // Get likes
-    const [likes] = await pool.query('SELECT user_id FROM comment_likes WHERE comment_id = ?', [comment.id]);
-    comment.likedBy = (likes as any[]).map(l => l.user_id);
-
-    // Get replies
+  if (commentList.length > 0) {
+    const commentIds = commentList.map(c => c.id);
+    const commentUserIds = commentList.map(c => c.user_id);
+    
+    // 1. Fetch replies
     const [replies] = await pool.query(`
       SELECT 
         r.id, r.comment_id as commentId, r.user_id as userId, 
@@ -26,17 +22,66 @@ const fetchComments = async (query: string, params: any[]) => {
         u.username, COALESCE(u.avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as userAvatar 
       FROM replies r 
       JOIN users u ON r.user_id = u.id 
-      WHERE r.comment_id = ? 
+      WHERE r.comment_id IN (?) 
       ORDER BY r.created_at ASC
-    `, [comment.id]);
+    `, [commentIds]);
     
-    for (let reply of (replies as any[])) {
-      const [replyRoles] = await pool.query('SELECT r.name FROM roles r JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = ?', [reply.user_id]);
-      reply.roles = (replyRoles as any[]).map(r => r.name);
+    const replyList = replies as any[];
+    const replyUserIds = replyList.map(r => r.userId);
+    
+    // 2. Fetch roles for all user IDs (comment authors & reply authors)
+    const allUserIds = Array.from(new Set([...commentUserIds, ...replyUserIds]));
+    const rolesMap: Record<string, string[]> = {};
+    if (allUserIds.length > 0) {
+      const [rolesRows] = await pool.query(`
+        SELECT ur.user_id as userId, r.name as roleName
+        FROM user_roles ur
+        JOIN roles r ON ur.role_id = r.id
+        WHERE ur.user_id IN (?)
+      `, [allUserIds]);
+      
+      for (const row of (rolesRows as any[])) {
+        if (!rolesMap[row.userId]) {
+          rolesMap[row.userId] = [];
+        }
+        rolesMap[row.userId].push(row.roleName);
+      }
     }
-    comment.replies = replies;
+    
+    // 3. Fetch likes for all comment IDs
+    const [likesRows] = await pool.query(`
+      SELECT comment_id as commentId, user_id as userId
+      FROM comment_likes
+      WHERE comment_id IN (?)
+    `, [commentIds]);
+    
+    const likesMap: Record<string, string[]> = {};
+    for (const row of (likesRows as any[])) {
+      if (!likesMap[row.commentId]) {
+        likesMap[row.commentId] = [];
+      }
+      likesMap[row.commentId].push(row.userId);
+    }
+    
+    // 4. Map roles to replies and group replies by commentId
+    const repliesMap: Record<string, any[]> = {};
+    for (let reply of replyList) {
+      reply.roles = rolesMap[reply.userId] || [];
+      if (!repliesMap[reply.commentId]) {
+        repliesMap[reply.commentId] = [];
+      }
+      repliesMap[reply.commentId].push(reply);
+    }
+    
+    // 5. Map everything back to comments
+    for (let comment of commentList) {
+      comment.roles = rolesMap[comment.user_id] || [];
+      comment.likedBy = likesMap[comment.id] || [];
+      comment.replies = repliesMap[comment.id] || [];
+    }
   }
-  return comments;
+  
+  return commentList;
 };
 
 /**
