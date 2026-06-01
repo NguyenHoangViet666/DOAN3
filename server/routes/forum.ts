@@ -5,7 +5,18 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Get all posts
+/**
+ * @swagger
+ * /api/forum:
+ *   get:
+ *     summary: Lấy tất cả bài viết trên diễn đàn
+ *     tags: [Forum]
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/', async (req, res) => {
   try {
     const [posts] = await pool.query(`
@@ -31,7 +42,27 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get post by ID
+/**
+ * @swagger
+ * /api/forum/{id}:
+ *   get:
+ *     summary: Lấy chi tiết bài viết theo ID
+ *     tags: [Forum]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID bài viết
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       404:
+ *         description: Không tìm thấy bài viết
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/:id', async (req, res) => {
   try {
     await pool.query('UPDATE posts SET view_count = view_count + 1 WHERE id = ?', [req.params.id]);
@@ -87,7 +118,42 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-// Create post
+/**
+ * @swagger
+ * /api/forum:
+ *   post:
+ *     summary: Tạo một bài viết diễn đàn mới
+ *     tags: [Forum]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *               - topic
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Thảo luận về chương mới nhất của ma hoàng"
+ *               content:
+ *                 type: string
+ *                 example: "Các đạo hữu nghĩ sao về cảnh này..."
+ *               topic:
+ *                 type: string
+ *                 example: "Thảo Luận"
+ *     responses:
+ *       201:
+ *         description: Tạo bài viết thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { title, content, topic } = req.body;

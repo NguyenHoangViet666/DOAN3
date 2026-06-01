@@ -9,7 +9,25 @@ const countWords = (content: string) => {
   return content.replace(/<[^>]*>?/gm, ' ').trim().split(/\s+/).filter(Boolean).length;
 };
 
-// Get chapters for a novel
+/**
+ * @swagger
+ * /api/chapters/novel/{novelId}:
+ *   get:
+ *     summary: Lấy danh sách chương của một truyện
+ *     tags: [Chapters]
+ *     parameters:
+ *       - in: path
+ *         name: novelId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của truyện
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/novel/:novelId', async (req, res) => {
   try {
     const [chapters] = await pool.query(
@@ -22,7 +40,27 @@ router.get('/novel/:novelId', async (req, res) => {
   }
 });
 
-// Get a specific chapter
+/**
+ * @swagger
+ * /api/chapters/{id}:
+ *   get:
+ *     summary: Lấy nội dung chi tiết một chương
+ *     tags: [Chapters]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của chương
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       404:
+ *         description: Không tìm thấy chương
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/:id', async (req, res) => {
   try {
     const [chapters] = await pool.query('SELECT * FROM chapters WHERE id = ?', [req.params.id]);
@@ -43,7 +81,44 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create chapter
+/**
+ * @swagger
+ * /api/chapters:
+ *   post:
+ *     summary: Thêm chương mới cho truyện
+ *     tags: [Chapters]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - novelId
+ *               - title
+ *               - content
+ *             properties:
+ *               novelId:
+ *                 type: string
+ *                 example: "novel-uuid-here"
+ *               title:
+ *                 type: string
+ *                 example: "Chương 1: Trùng Sinh"
+ *               content:
+ *                 type: string
+ *                 example: "Nội dung chương viết ở đây..."
+ *     responses:
+ *       201:
+ *         description: Tạo chương thành công
+ *       403:
+ *         description: Không có quyền (chỉ uploader hoặc Admin mới có quyền thêm chương)
+ *       404:
+ *         description: Không tìm thấy truyện
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { novelId, title, content, wordCount } = req.body;

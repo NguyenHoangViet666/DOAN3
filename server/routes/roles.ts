@@ -5,7 +5,40 @@ import { authenticateToken, AuthRequest, requireRole } from '../middleware/auth'
 
 const router = Router();
 
-// Create role request
+/**
+ * @swagger
+ * /api/roles/request:
+ *   post:
+ *     summary: Gửi yêu cầu xin cấp/đổi vai trò mới (Creator, Translator, ...)
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - requestedRole
+ *               - reason
+ *             properties:
+ *               requestedRole:
+ *                 type: string
+ *                 example: "Creator"
+ *               reason:
+ *                 type: string
+ *                 example: "Muốn xin quyền đăng tải truyện tự sáng tác."
+ *     responses:
+ *       201:
+ *         description: Gửi yêu cầu thành công
+ *       400:
+ *         description: Đã có yêu cầu đang trong trạng thái chờ duyệt trước đó
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/request', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { requestedRole, reason } = req.body;
@@ -25,7 +58,24 @@ router.post('/request', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
-// Get role requests (Admin only)
+/**
+ * @swagger
+ * /api/roles/requests:
+ *   get:
+ *     summary: Lấy danh sách các yêu cầu cấp quyền (Chỉ dành cho Admin/SSR/Mod)
+ *     tags: [Roles]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       403:
+ *         description: Không có quyền truy cập
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/requests', authenticateToken, requireRole(['Admin', 'SSR', 'Mod']), async (req: AuthRequest, res) => {
   try {
     const [requests] = await pool.query(`

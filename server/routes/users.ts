@@ -5,7 +5,22 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Get all users (Admin only)
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Lấy danh sách tất cả người dùng (Chỉ dành cho Admin/SSR/Mod)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách thành công
+ *       403:
+ *         description: Không có quyền truy cập (Forbidden)
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const isAdmin = req.user?.roles.includes('Admin') || req.user?.roles.includes('SSR') || req.user?.roles.includes('Mod');
@@ -28,7 +43,27 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
-// Get user profile
+/**
+ * @swagger
+ * /api/users/{id}:
+ *   get:
+ *     summary: Lấy thông tin hồ sơ của người dùng theo ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID người dùng
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       404:
+ *         description: Không tìm thấy người dùng
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/:id', async (req, res) => {
   try {
     const [users] = await pool.query("SELECT id, username, email, COALESCE(avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar FROM users WHERE id = ?", [req.params.id]);
@@ -72,7 +107,37 @@ router.post('/make-admin', async (req, res) => {
   }
 });
 
-// Update profile
+/**
+ * @swagger
+ * /api/users/me:
+ *   put:
+ *     summary: Cập nhật thông tin hồ sơ cá nhân
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: new_display_name
+ *               avatar:
+ *                 type: string
+ *                 example: https://new-avatar-link.png
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       404:
+ *         description: Không tìm thấy người dùng
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.put('/me', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { username, avatar } = req.body;
@@ -171,7 +236,29 @@ router.delete('/:id', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
-// Toggle Like Novel
+/**
+ * @swagger
+ * /api/users/like/{novelId}:
+ *   post:
+ *     summary: Thích / Bỏ thích một truyện
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: novelId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID truyện cần Thích / Bỏ thích
+ *     responses:
+ *       200:
+ *         description: Đã thay đổi trạng thái (Thành công)
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/like/:novelId', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const novelId = req.params.novelId;

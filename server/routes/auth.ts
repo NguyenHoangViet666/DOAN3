@@ -8,6 +8,40 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Đăng ký tài khoản mới
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: testuser
+ *               email:
+ *                 type: string
+ *                 example: testuser@example.com
+ *               password:
+ *                 type: string
+ *                 example: Admin@123
+ *     responses:
+ *       201:
+ *         description: Đăng ký thành công
+ *       400:
+ *         description: Email đã tồn tại hoặc mật khẩu không hợp lệ
+ *       500:
+ *         description: Lỗi máy chủ
+ */
 router.post('/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -47,6 +81,36 @@ router.post('/register', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Đăng nhập tài khoản
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: testuser@example.com
+ *               password:
+ *                 type: string
+ *                 example: Admin@123
+ *     responses:
+ *       200:
+ *         description: Đăng nhập thành công, trả về JWT token và thông tin user
+ *       400:
+ *         description: Tài khoản hoặc mật khẩu không chính xác
+ *       500:
+ *         description: Lỗi máy chủ
+ */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -89,6 +153,24 @@ router.post('/login', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: Lấy thông tin tài khoản hiện tại
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lấy thông tin thành công
+ *       401:
+ *         description: Không có quyền truy cập (thiếu/sai Token)
+ *       404:
+ *         description: Không tìm thấy người dùng
+ *       500:
+ *         description: Lỗi máy chủ
+ */
 router.get('/me', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const [users] = await pool.query("SELECT id, username, email, COALESCE(avatar, 'https://i.pinimg.com/736x/4b/90/5b/4b905b1342b5635310923fd10319c265.jpg') as avatar FROM users WHERE id = ?", [req.user?.id]);

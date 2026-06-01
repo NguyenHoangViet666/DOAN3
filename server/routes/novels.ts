@@ -5,7 +5,29 @@ import { authenticateToken, AuthRequest, requireRole } from '../middleware/auth'
 
 const router = Router();
 
-// Get all novels (with filters)
+/**
+ * @swagger
+ * /api/novels:
+ *   get:
+ *     summary: Lấy danh sách tất cả truyện
+ *     tags: [Novels]
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *         description: Lọc theo loại truyện (Ví dụ convert, dịch...)
+ *       - in: query
+ *         name: isPending
+ *         schema:
+ *           type: string
+ *         description: Lọc truyện chờ duyệt (true/false)
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/', async (req, res) => {
   try {
     const { type, isPending } = req.query;
@@ -58,7 +80,27 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get novel by ID
+/**
+ * @swagger
+ * /api/novels/{id}:
+ *   get:
+ *     summary: Lấy chi tiết một truyện theo ID
+ *     tags: [Novels]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID của truyện cần tìm
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       404:
+ *         description: Không tìm thấy truyện
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/:id', async (req, res) => {
   try {
     const [novels] = await pool.query('SELECT * FROM novels WHERE id = ?', [req.params.id]);
@@ -94,7 +136,63 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Create novel
+/**
+ * @swagger
+ * /api/novels:
+ *   post:
+ *     summary: Đăng tải một truyện mới (chờ duyệt)
+ *     tags: [Novels]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - author
+ *               - description
+ *               - coverUrl
+ *               - type
+ *               - status
+ *               - length
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Đại Quản Gia Là Ma Hoàng"
+ *               author:
+ *                 type: string
+ *                 example: "Diệp Kiêu"
+ *               description:
+ *                 type: string
+ *                 example: "Mô tả sơ lược về truyện..."
+ *               coverUrl:
+ *                 type: string
+ *                 example: "https://i.pinimg.com/736x/..."
+ *               type:
+ *                 type: string
+ *                 example: "Convert"
+ *               status:
+ *                 type: string
+ *                 example: "ONGOING"
+ *               length:
+ *                 type: string
+ *                 example: "Dài"
+ *               genres:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["Huyền Huyễn", "Tiên Hiệp"]
+ *     responses:
+ *       201:
+ *         description: Đăng truyện thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { title, author, description, coverUrl, type, status, length, genres } = req.body;

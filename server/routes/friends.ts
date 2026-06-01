@@ -5,7 +5,31 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Send friend request
+/**
+ * @swagger
+ * /api/friends/request/{toUserId}:
+ *   post:
+ *     summary: Gửi yêu cầu kết bạn tới một người dùng khác
+ *     tags: [Friends]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: toUserId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID người nhận yêu cầu kết bạn
+ *     responses:
+ *       201:
+ *         description: Gửi yêu cầu thành công
+ *       400:
+ *         description: Yêu cầu không hợp lệ (gửi cho chính mình hoặc đã gửi rồi)
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/request/:toUserId', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const fromUserId = req.user?.id;
@@ -45,7 +69,29 @@ router.post('/cancel/:toUserId', authenticateToken, async (req: AuthRequest, res
   }
 });
 
-// Accept friend request
+/**
+ * @swagger
+ * /api/friends/accept/{fromUserId}:
+ *   post:
+ *     summary: Chấp nhận yêu cầu kết bạn từ người dùng khác
+ *     tags: [Friends]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: fromUserId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID người gửi yêu cầu kết bạn
+ *     responses:
+ *       200:
+ *         description: Chấp nhận kết bạn thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/accept/:fromUserId', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const currentUser = req.user?.id;

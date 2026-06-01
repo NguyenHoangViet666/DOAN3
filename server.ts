@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import apiRoutes from './server/api';
 import { initDb, pool } from './server/db';
 
@@ -30,6 +32,40 @@ async function startServer() {
 
   // API Routes
   app.use('/api', apiRoutes);
+
+  // Swagger Documentation Setup
+  const swaggerOptions = {
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: 'BetoBook API Docs',
+        version: '1.0.0',
+        description: 'Tài liệu hướng dẫn sử dụng và thử nghiệm API cho dự án BetoBook',
+      },
+      servers: [
+        {
+          url: `http://localhost:${PORT}`,
+          description: 'Development Server',
+        },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+    },
+    apis: [
+      './server/routes/*.ts',
+      './server/api.ts'
+    ],
+  };
+
+  const swaggerSpec = swaggerJsdoc(swaggerOptions);
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   // Detailed Health check
   app.get('/api/health', async (req, res) => {

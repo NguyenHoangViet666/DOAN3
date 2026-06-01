@@ -5,7 +5,22 @@ import { authenticateToken, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// Get user's conversations
+/**
+ * @swagger
+ * /api/messages:
+ *   get:
+ *     summary: Lấy danh sách các cuộc hội thoại của người dùng
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.id;
@@ -71,7 +86,29 @@ router.get('/partner/:partnerId', authenticateToken, async (req: AuthRequest, re
   }
 });
 
-// Get messages in a conversation
+/**
+ * @swagger
+ * /api/messages/{id}:
+ *   get:
+ *     summary: Lấy danh sách tin nhắn trong cuộc hội thoại
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID cuộc hội thoại
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const [messages] = await pool.query('SELECT id, conversation_id as conversationId, sender_id as senderId, content, is_read as isRead, created_at as createdAt FROM messages WHERE conversation_id = ? ORDER BY created_at ASC', [req.params.id]);
@@ -81,7 +118,38 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
-// Send a message
+/**
+ * @swagger
+ * /api/messages:
+ *   post:
+ *     summary: Gửi tin nhắn mới tới người dùng khác
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - toUserId
+ *               - content
+ *             properties:
+ *               toUserId:
+ *                 type: string
+ *                 example: "user-uuid-to-send"
+ *               content:
+ *                 type: string
+ *                 example: "Xin chào bạn!"
+ *     responses:
+ *       201:
+ *         description: Gửi tin nhắn thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { toUserId, content } = req.body;

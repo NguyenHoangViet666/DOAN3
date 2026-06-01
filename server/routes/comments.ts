@@ -39,7 +39,25 @@ const fetchComments = async (query: string, params: any[]) => {
   return comments;
 };
 
-// Get comments for a novel
+/**
+ * @swagger
+ * /api/comments/novel/{novelId}:
+ *   get:
+ *     summary: Lấy danh sách bình luận của truyện
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: novelId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID truyện
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/novel/:novelId', async (req, res) => {
   try {
     const query = `
@@ -59,7 +77,25 @@ router.get('/novel/:novelId', async (req, res) => {
   }
 });
 
-// Get comments for a post
+/**
+ * @swagger
+ * /api/comments/post/{postId}:
+ *   get:
+ *     summary: Lấy danh sách bình luận của bài viết diễn đàn
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: postId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID bài viết
+ *     responses:
+ *       200:
+ *         description: Thành công
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.get('/post/:postId', async (req, res) => {
   try {
     const query = `
@@ -79,7 +115,40 @@ router.get('/post/:postId', async (req, res) => {
   }
 });
 
-// Create comment
+/**
+ * @swagger
+ * /api/comments:
+ *   post:
+ *     summary: Tạo một bình luận mới (cho truyện hoặc bài viết)
+ *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               novelId:
+ *                 type: string
+ *                 example: "novel-uuid-here"
+ *               postId:
+ *                 type: string
+ *                 example: "post-uuid-here"
+ *               content:
+ *                 type: string
+ *                 example: "Truyện đọc rất cuốn, cảm ơn nhóm dịch!"
+ *     responses:
+ *       201:
+ *         description: Tạo bình luận thành công
+ *       401:
+ *         description: Chưa xác thực token
+ *       500:
+ *         description: Lỗi hệ thống
+ */
 router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { novelId, postId, content } = req.body;
