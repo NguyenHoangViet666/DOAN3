@@ -35,32 +35,43 @@ const shuffleWithSeed = <T,>(array: T[], seed: string): T[] => {
 };
 
 // Component hiển thị Card truyện nhỏ
-const NovelCard: React.FC<{ novel: Novel }> = ({ novel }) => (
-  <Link to={`/novel/${novel.id}`} className="group flex flex-col bg-white dark:bg-[#1a1b26] rounded-2xl shadow-sm hover:shadow-2xl dark:hover:shadow-[0_10px_40px_-10px_rgba(124,58,237,0.3)] transition-all duration-500 overflow-hidden border border-slate-100/50 dark:border-slate-800 hover:border-primary/50 dark:hover:border-primary/50 transform hover:-translate-y-3 h-full relative">
-      <div className="shine-effect"></div>
-      <div className="aspect-[2/3] w-full overflow-hidden bg-slate-200 dark:bg-slate-800 relative">
-          <img 
-          src={novel.coverUrl} 
-          alt={novel.title} 
-          className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 shadow-lg font-medium tracking-wide">
-          {novel.status}
-          </div>
-      </div>
-      <div className="flex-1 p-4 flex flex-col bg-gradient-to-b from-white dark:from-[#1a1b26] to-slate-50/50 dark:to-[#0f1016]">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-2 group-hover:text-primary dark:group-hover:text-primary transition-colors min-h-[40px] leading-snug">
-          {novel.title}
-          </h3>
-          <div className="flex flex-wrap gap-1.5 mt-3">
-              {novel.genres.slice(0, 2).map(g => (
-                  <span key={g} className="text-[10px] px-2 py-1 bg-slate-100/80 dark:bg-slate-800 text-slate-600 dark:text-white rounded-md border border-slate-200/60 dark:border-slate-700/60 whitespace-nowrap font-medium">{g}</span>
-              ))}
-          </div>
-      </div>
-  </Link>
-);
+const NovelCard: React.FC<{ novel: Novel }> = ({ novel }) => {
+  const rating = novel.ratingCount && novel.ratingCount > 0 ? (novel.ratingSum! / novel.ratingCount).toFixed(1) : 'N/A';
+  return (
+    <Link to={`/novel/${novel.id}`} className="group flex flex-col bg-white dark:bg-[#1a1b26] rounded-2xl shadow-sm hover:shadow-2xl dark:hover:shadow-[0_10px_40px_-10px_rgba(124,58,237,0.3)] transition-all duration-500 overflow-hidden border border-slate-100/50 dark:border-slate-800 hover:border-primary/50 dark:hover:border-primary/50 transform hover:-translate-y-3 h-full relative">
+        <div className="shine-effect"></div>
+        <div className="aspect-[2/3] w-full overflow-hidden bg-slate-200 dark:bg-slate-800 relative">
+            <img 
+              src={novel.coverUrl} 
+              alt={novel.title} 
+              className="h-full w-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            {/* Status Tag */}
+            <div className="absolute top-2 left-2 bg-black/60 text-white text-[9px] px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20 shadow-lg font-bold tracking-wide">
+              {novel.status}
+            </div>
+
+            {/* Rating Tag */}
+            <div className="absolute bottom-2 right-2 bg-amber-500 text-slate-900 text-[10px] font-black px-2 py-0.5 rounded-lg shadow-lg flex items-center gap-1 scale-90 group-hover:scale-100 transition-transform duration-300">
+              {rating !== 'N/A' && <Star className="w-3 h-3 fill-slate-900 stroke-none"/>}
+              <span>{rating}</span>
+            </div>
+        </div>
+        <div className="flex-1 p-3.5 flex flex-col bg-gradient-to-b from-white dark:from-[#1a1b26] to-slate-50/50 dark:to-[#0f1016]">
+            <h3 className="text-xs md:text-sm font-bold text-slate-900 dark:text-slate-100 line-clamp-2 group-hover:text-primary dark:group-hover:text-primary transition-colors min-h-[40px] leading-snug">
+              {novel.title}
+            </h3>
+            <div className="flex flex-wrap gap-1 mt-3 mt-auto">
+                {novel.genres.slice(0, 2).map(g => (
+                    <span key={g} className="text-[9px] px-2 py-0.5 bg-slate-100/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded border border-slate-200/60 dark:border-slate-700/60 whitespace-nowrap font-medium">{g}</span>
+                ))}
+            </div>
+        </div>
+    </Link>
+  );
+};
 
 export const Home: React.FC = () => {
   const [novels, setNovels] = useState<Novel[]>([]);
@@ -245,34 +256,42 @@ export const Home: React.FC = () => {
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/50 to-transparent"></div>
                   </div>
                   
-                  <div className="relative max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-24 flex flex-col md:flex-row items-center md:items-end h-full justify-center md:justify-start 2xl:px-16">
-                     <div className="hidden md:block w-56 h-80 flex-shrink-0 rounded-xl shadow-[0_20px_50px_-5px_rgba(124,58,237,0.4)] overflow-hidden border border-white/20 mr-10 transform transition-all duration-700 hover:scale-[1.03] hover:rotate-2 hover:-translate-y-2 group relative animate-float">
-                        <div className="shine-effect"></div>
-                        <img src={slide.coverUrl} alt={slide.title} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 ring-1 ring-inset ring-white/30 rounded-xl"></div>
-                        <div className="absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-white/10 opacity-60"></div>
-                     </div>
-                     <div className="flex-1 text-center md:text-left max-w-3xl relative z-10">
-                        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 text-white text-[10px] md:text-xs font-bold mb-4 md:mb-6 shadow-[0_0_15px_rgba(124,58,237,0.5)] relative overflow-hidden group-hover:border-primary/50 transition-colors">
-                          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0 translate-x-[-100%] animate-[shine_2s_infinite]"></div>
-                          <Sparkles className="w-3.5 h-3.5 mr-1.5 text-yellow-400 animate-pulse" /> GỢI Í HÔM NAY
+                  <div className="relative max-w-[1700px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-20 flex flex-col md:flex-row items-center h-full justify-center md:justify-start 2xl:px-16 gap-8">
+                     {/* 3D Book Mockup with paper pages edge */}
+                     <div className="hidden md:block perspective-container mr-6 flex-shrink-0 animate-float">
+                        <div className="relative w-56 h-80 rounded-2xl group cursor-pointer book-3d">
+                           <div className="shine-effect rounded-2xl"></div>
+                           <img src={slide.coverUrl} alt={slide.title} className="w-full h-full object-cover rounded-2xl border border-white/10" />
+                           {/* Simulated 3D pages edge */}
+                           <div className="absolute inset-y-1.5 -right-2 w-2 bg-gradient-to-b from-slate-200 via-slate-100 to-slate-300 dark:from-slate-700 dark:via-slate-650 dark:to-slate-800 rounded-r border-r border-y border-white/10 z-0 origin-left transform rotate-y-[90deg] skew-y-3"></div>
                         </div>
-                        <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight mb-5 drop-shadow-2xl line-clamp-2 leading-tight silver-metallic-text">
-                          {slide.title}
+                     </div>
+
+                     {/* Glassmorphic Info Card */}
+                     <div className="flex-1 text-center md:text-left max-w-3xl bg-slate-950/40 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-white/10 shadow-2xl relative z-10">
+                        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-yellow-500/20 border border-amber-500/30 text-amber-300 text-[10px] md:text-xs font-bold mb-4 md:mb-6 shadow-[0_0_15px_rgba(245,158,11,0.3)] relative overflow-hidden">
+                           <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-300 animate-pulse" /> NỔI BẬT HÔM NAY
+                        </div>
+                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 drop-shadow-2xl line-clamp-2 leading-tight silver-metallic-text">
+                           {slide.title}
                         </h1>
-                        <p className="text-sm md:text-lg text-white mb-8 line-clamp-3 md:line-clamp-2 max-w-2xl mx-auto md:mx-0 leading-relaxed font-light backdrop-blur-sm">
-                          {slide.description}
+                        <p className="text-xs md:text-sm text-slate-200 mb-6 line-clamp-3 md:line-clamp-2 max-w-2xl mx-auto md:mx-0 leading-relaxed font-light">
+                           {slide.description}
                         </p>
-                        <div className="flex flex-col sm:flex-row items-center md:justify-start justify-center gap-4">
-                          <Link 
-                            to={`/novel/${slide.id}`}
-                            className="px-8 py-3.5 bg-white text-slate-900 hover:bg-slate-100 rounded-full font-bold transition-all transform hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] w-full sm:w-auto text-center flex items-center justify-center"
-                          >
-                            <BookOpen className="w-4 h-4 mr-2" /> Đọc Ngay
-                          </Link>
-                          <span className="text-slate-300 text-xs md:text-sm font-medium uppercase tracking-widest flex items-center bg-black/20 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5">
-                            <PenTool className="w-3.5 h-3.5 mr-2 text-slate-400"/> {slide.author}
-                          </span>
+                        <div className="flex flex-wrap items-center md:justify-start justify-center gap-3">
+                           <Link 
+                             to={`/novel/${slide.id}`}
+                             className="px-8 py-3.5 bg-gradient-to-r from-primary to-purple-600 text-white rounded-full font-bold transition-all transform hover:scale-105 hover:shadow-[0_0_25px_rgba(124,58,237,0.5)] border border-primary/20 w-full sm:w-auto text-center flex items-center justify-center text-sm"
+                           >
+                             <BookOpen className="w-4 h-4 mr-2" /> Đọc Ngay
+                           </Link>
+                           <span className="text-slate-300 text-xs md:text-sm font-medium uppercase tracking-widest flex items-center bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5">
+                             <PenTool className="w-3.5 h-3.5 mr-2 text-slate-400"/> {slide.author}
+                           </span>
+                           <span className="text-amber-400 text-xs md:text-sm font-extrabold flex items-center bg-black/40 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5">
+                             <Star className="w-3.5 h-3.5 mr-1.5 fill-amber-400 stroke-none"/>
+                             {slide.ratingCount && slide.ratingCount > 0 ? (slide.ratingSum! / slide.ratingCount).toFixed(1) : 'N/A'}
+                           </span>
                         </div>
                      </div>
                   </div>
@@ -305,22 +324,44 @@ export const Home: React.FC = () => {
         
         {/* NEW PHASE 8: INSTAGRAM STORIES AUTHORS STRIP */}
         <section className="pt-6 animate-fadeIn">
-            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center">
-                <Sparkles className="w-4 h-4 mr-2 text-primary" /> Tác Giả Ngôi Sao
-            </h2>
-            <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide snap-x">
-                {Array.from(new Set(novels.filter(n => n.type === NovelType.ORIGINAL).map(n => n.author))).slice(0, 10).map((author, idx) => (
-                    <div key={idx} className="flex flex-col items-center gap-2 snap-center group cursor-pointer flex-shrink-0">
-                        <div className="relative p-1 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 group-hover:animate-spin shadow-lg shadow-purple-500/20">
-                            <div className="w-16 h-16 md:w-20 md:h-20 bg-white dark:bg-[#1a1b26] rounded-full p-0.5 relative overflow-hidden flex items-center justify-center border-2 border-transparent">
-                                <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${author}&backgroundColor=transparent`} className="w-full h-full object-cover rounded-full bg-slate-100 dark:bg-slate-800" alt={author} />
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xs md:text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center">
+                    <Sparkles className="w-4 h-4 mr-2 text-primary animate-pulse" /> Tác Giả Ngôi Sao
+                </h2>
+                <span className="text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Hall of Fame</span>
+            </div>
+            <div className="flex overflow-x-auto gap-5 pb-4 scrollbar-hide snap-x">
+                {Array.from(new Set(novels.filter(n => n.type === NovelType.ORIGINAL).map(n => n.author))).slice(0, 10).map((author, idx) => {
+                    const levelLabel = idx === 0 ? 'Đại Thần' : idx === 1 ? 'Bạch Kim' : idx === 2 ? 'Đỉnh Phong' : 'Danh Tiếng';
+                    const gradientClass = idx === 0 ? 'from-amber-400 via-rose-500 to-primary' : 
+                                          idx === 1 ? 'from-purple-600 via-fuchsia-500 to-blue-400' :
+                                          idx === 2 ? 'from-emerald-400 via-teal-500 to-cyan-500' :
+                                          'from-slate-200 via-slate-300 to-slate-400 dark:from-slate-700 dark:via-slate-800 dark:to-slate-900';
+                    return (
+                        <div key={idx} className="flex flex-col items-center gap-2 snap-center group cursor-pointer flex-shrink-0">
+                            <div className={`relative p-[3px] rounded-full bg-gradient-to-tr ${gradientClass} transition-transform duration-300 group-hover:scale-110 shadow-lg shadow-purple-500/5 group-hover:shadow-purple-500/20`}>
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-white dark:bg-[#1a1b26] rounded-full p-[2px] relative overflow-hidden flex items-center justify-center">
+                                    <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=${author}&backgroundColor=transparent`} className="w-full h-full object-cover rounded-full bg-slate-100 dark:bg-slate-800" alt={author} />
+                                </div>
+                                {idx < 3 && (
+                                    <div className="absolute -top-1 -right-1 bg-amber-500 text-slate-900 font-extrabold text-[9px] w-5 h-5 rounded-full flex items-center justify-center shadow-md border border-white">
+                                        👑
+                                    </div>
+                                )}
                             </div>
+                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 w-20 text-center truncate">{author}</span>
+                            <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                                idx === 0 ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' :
+                                idx === 1 ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' :
+                                idx === 2 ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20' :
+                                'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-transparent'
+                            }`}>{levelLabel}</span>
                         </div>
-                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 w-20 text-center truncate">{author}</span>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </section>
+
         {/* QUICK GENRES LINKS */}
         <section className="pt-4">
             <div className="flex overflow-x-auto scrollbar-hide gap-3 pb-4 px-1">
@@ -425,43 +466,57 @@ export const Home: React.FC = () => {
 
                 {/* NEW: GENRE SPOTLIGHT (Asymmetrical Layout) */}
                 {spotlightNovels.length >= 2 && (
-                    <section className="animate-fadeIn mb-12 md:mb-16">
-                        <div className="flex items-center justify-between mb-4 md:mb-6">
-                            <h2 className="text-lg md:text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center">
-                                <Flame className="w-5 h-5 md:w-6 md:h-6 mr-2 text-rose-500"/>
-                                Tiêu Điểm: <span className="text-primary dark:text-purple-400 ml-2">{spotlightGenre}</span>
+                    <section className="animate-fadeIn mb-12 md:mb-16 bg-slate-900/90 dark:bg-[#111219]/90 border border-slate-800 dark:border-purple-950/40 p-5 md:p-7 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+                        {/* Red glow backdrop */}
+                        <div className="absolute -top-40 -left-40 w-96 h-96 bg-rose-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+                        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+                        
+                        <div className="flex items-center justify-between mb-5 md:mb-7 relative z-10">
+                            <h2 className="text-lg md:text-2xl font-extrabold text-white flex items-center">
+                                <Flame className="w-5 h-5 md:w-6 md:h-6 mr-2 text-rose-500 animate-pulse"/>
+                                Tiêu Điểm Tuần: <span className="bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent ml-2 font-black">{spotlightGenre}</span>
                             </h2>
-                            <Link to={`/search?q=${encodeURIComponent(spotlightGenre)}`} className="text-xs md:text-sm font-medium text-primary dark:text-purple-400 hover:underline flex items-center">
-                                Xem thêm <ChevronRight className="w-3 h-3 md:w-4 md:h-4"/>
+                            <Link to={`/search?q=${encodeURIComponent(spotlightGenre)}`} className="text-xs md:text-sm font-semibold text-rose-400 hover:text-rose-350 flex items-center">
+                                Khám phá ngay <ChevronRight className="w-3.5 h-3.5 ml-0.5"/>
                             </Link>
                         </div>
-                        <div className="flex flex-col md:flex-row gap-4 h-auto md:h-[350px]">
+                        <div className="flex flex-col md:flex-row gap-5 h-auto md:h-[360px] relative z-10">
                             {/* Left Hero Card */}
-                            <Link to={`/novel/${spotlightNovels[0].id}`} className="flex-1 md:w-1/2 h-[300px] md:h-full rounded-2xl overflow-hidden relative group border border-slate-200 dark:border-slate-800 shadow-xl shadow-rose-500/5">
-                                <img src={spotlightNovels[0].coverUrl} alt={spotlightNovels[0].title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10"></div>
-                                <div className="absolute bottom-0 left-0 right-0 p-6">
-                                    <div className="flex items-center text-yellow-400 text-xs font-bold mb-2">
-                                        <Star className="w-3 h-3 fill-yellow-400 mr-1"/> {(spotlightNovels[0].ratingCount ? spotlightNovels[0].ratingSum! / spotlightNovels[0].ratingCount : 9.9).toFixed(1)}
-                                    </div>
-                                    <h3 className="text-2xl font-extrabold text-white mb-2 line-clamp-2 md:line-clamp-1">{spotlightNovels[0].title}</h3>
+                            <Link to={`/novel/${spotlightNovels[0].id}`} className="flex-1 md:w-1/2 h-[300px] md:h-full rounded-2xl overflow-hidden relative group border border-white/5 shadow-2xl">
+                                <img src={spotlightNovels[0].coverUrl} alt={spotlightNovels[0].title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/50 to-transparent"></div>
+                                <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+                                    <div className="inline-flex items-center bg-rose-500 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full mb-3 shadow-lg uppercase tracking-wider">SIÊU PHẨM</div>
+                                    <h3 className="text-xl md:text-2xl font-extrabold text-white mb-2 line-clamp-2 group-hover:text-rose-400 transition-colors leading-tight">{spotlightNovels[0].title}</h3>
                                     <p className="text-slate-300 text-xs line-clamp-2 mb-4 font-light leading-relaxed">{spotlightNovels[0].description}</p>
-                                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-bold text-white border border-white/30 truncate max-w-[150px]"><PenTool className="w-3 h-3 inline pb-0.5 mr-1"/>{spotlightNovels[0].author}</span>
+                                    <div className="flex items-center justify-between mt-auto">
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase"><PenTool className="w-3 h-3 inline pb-0.5 mr-1 text-rose-500"/> {spotlightNovels[0].author}</span>
+                                        <span className="text-rose-400 text-xs font-black flex items-center gap-1">
+                                            {spotlightNovels[0].ratingCount && spotlightNovels[0].ratingCount > 0 ? (
+                                                <>
+                                                    <Star className="w-3.5 h-3.5 fill-rose-400 stroke-none"/>
+                                                    {(spotlightNovels[0].ratingSum! / spotlightNovels[0].ratingCount).toFixed(1)}
+                                                </>
+                                            ) : (
+                                                'N/A'
+                                            )}
+                                        </span>
+                                    </div>
                                 </div>
                             </Link>
                             
                             {/* Right List */}
-                            <div className="flex-1 md:w-1/2 flex flex-col gap-4 h-auto md:h-full overflow-y-auto pr-1 sm:pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}>
+                            <div className="flex-1 md:w-1/2 flex flex-col gap-3.5 h-auto md:h-full overflow-y-auto pr-1 scrollbar-hide">
                                 {spotlightNovels.slice(1, 8).map((novel, idx) => (
-                                    <Link key={novel.id} to={`/novel/${novel.id}`} className="shrink-0 h-[100px] md:h-[110px] rounded-2xl bg-white dark:bg-[#1a1b26] border border-slate-100 dark:border-slate-800/80 p-2.5 flex gap-4 transition-all hover:-translate-x-1 hover:shadow-lg hover:border-rose-300/50 dark:hover:border-rose-700/50 group">
-                                        <div className="w-[70px] md:w-20 h-full overflow-hidden rounded-xl shrink-0">
-                                            <img src={novel.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt=""/>
+                                    <Link key={novel.id} to={`/novel/${novel.id}`} className="shrink-0 h-[100px] rounded-2xl bg-white/5 border border-white/5 p-2 flex gap-4 transition-all hover:bg-white/10 hover:border-rose-500/20 group">
+                                        <div className="w-[70px] h-full overflow-hidden rounded-xl shrink-0 border border-white/5">
+                                            <img src={novel.coverUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt=""/>
                                         </div>
                                         <div className="flex flex-col justify-center py-1 pr-2 w-full">
-                                            <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm line-clamp-2 leading-snug group-hover:text-rose-500 dark:group-hover:text-rose-400 transition-colors mb-2">{novel.title}</h4>
+                                            <h4 className="font-bold text-slate-200 text-xs md:text-sm line-clamp-2 group-hover:text-rose-400 transition-colors leading-snug">{novel.title}</h4>
                                             <div className="flex items-center justify-between w-full mt-auto">
-                                                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[100px]"><User className="w-3 h-3 inline pb-0.5 mr-1"/>{novel.author}</span>
-                                                <span className="text-[10px] py-0.5 px-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded font-medium border border-slate-200 dark:border-slate-700">{novel.type}</span>
+                                                <span className="text-[10px] text-slate-400 font-medium truncate max-w-[120px]"><User className="w-3 h-3 inline pb-0.5 mr-1 text-rose-500"/>{novel.author}</span>
+                                                <span className="text-[9px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">{novel.type}</span>
                                             </div>
                                         </div>
                                     </Link>
@@ -542,7 +597,7 @@ export const Home: React.FC = () => {
                         </div>
                         <div className="space-y-4 relative z-10">
                             {topRatedNovels.map((novel, index) => {
-                                const score = novel.ratingCount ? (novel.ratingSum! / novel.ratingCount).toFixed(1) : '9.9';
+                                const score = novel.ratingCount && novel.ratingCount > 0 ? (novel.ratingSum! / novel.ratingCount).toFixed(1) : 'N/A';
                                 return (
                                     <Link key={novel.id} to={`/novel/${novel.id}`} className="flex items-center gap-3 bg-white/5 hover:bg-white/10 p-2.5 rounded-2xl transition-colors border border-white/5 hover:border-yellow-500/30 group/ticket">
                                         <div className="w-12 h-16 shrink-0 rounded-lg overflow-hidden border border-white/10 relative">
@@ -595,8 +650,14 @@ export const Home: React.FC = () => {
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="font-bold text-white text-lg line-clamp-2 leading-snug drop-shadow-md group-hover:text-yellow-400 transition-colors">{novel.title}</h3>
                                                     <div className="flex items-center text-xs text-yellow-200 mt-2 font-medium">
-                                                        <Star className="w-3.5 h-3.5 fill-yellow-400 mr-1"/>
-                                                        {novel.ratingCount ? (novel.ratingSum! / novel.ratingCount).toFixed(1) : '9.9'}
+                                                        {novel.ratingCount && novel.ratingCount > 0 ? (
+                                                            <>
+                                                                <Star className="w-3.5 h-3.5 fill-yellow-400 mr-1"/>
+                                                                {(novel.ratingSum! / novel.ratingCount).toFixed(1)}
+                                                            </>
+                                                        ) : (
+                                                            <span>N/A</span>
+                                                        )}
                                                         <span className="mx-2 opacity-50">•</span>
                                                         <span>{novel.author}</span>
                                                     </div>
@@ -606,22 +667,34 @@ export const Home: React.FC = () => {
                                     );
                                 }
                                 return (
-                                    <Link key={novel.id} to={`/novel/${novel.id}`} className="flex items-center gap-4 group">
+                                    <Link key={novel.id} to={`/novel/${novel.id}`} className="flex items-center gap-3.5 p-2 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/40 border border-transparent hover:border-slate-150/60 dark:hover:border-slate-800 transition-all duration-300 group">
                                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0 shadow-sm ${
-                                            index === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-white shadow-slate-400/30' :
-                                            index === 2 ? 'bg-gradient-to-br from-orange-400 to-amber-600 text-white shadow-orange-500/30' :
+                                            index === 1 ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-800 dark:text-white shadow-slate-400/10' :
+                                            index === 2 ? 'bg-gradient-to-br from-amber-600/60 to-amber-700 text-white shadow-amber-500/10' :
                                             'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                                         }`}>
                                             {index + 1}
                                         </div>
-                                        <img src={novel.coverUrl} className="w-12 h-16 md:w-14 md:h-20 object-cover rounded-lg shadow-sm group-hover:shadow-md transition-all group-hover:scale-105" alt=""/>
+                                        <div className="w-12 h-16 overflow-hidden rounded-xl shrink-0 border border-slate-100 dark:border-slate-800">
+                                            <img src={novel.coverUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt=""/>
+                                        </div>
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-bold text-slate-900 dark:text-slate-200 text-sm line-clamp-2 group-hover:text-primary dark:group-hover:text-primary transition-colors leading-snug">{novel.title}</h3>
-                                            <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-medium">
-                                                <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400 mr-1"/>
-                                                {novel.ratingCount ? (novel.ratingSum! / novel.ratingCount).toFixed(1) : 'N/A'}
-                                                <span className="mx-2 text-slate-300 dark:text-slate-600">•</span>
-                                                <span className="text-slate-400 dark:text-slate-500">{novel.type}</span>
+                                            <h3 className="font-bold text-slate-900 dark:text-slate-200 text-xs md:text-sm line-clamp-1 group-hover:text-primary dark:group-hover:text-primary transition-colors leading-snug">{novel.title}</h3>
+                                            <div className="flex items-center text-[10px] md:text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium gap-1.5">
+                                                <span className="flex items-center text-amber-500 font-bold">
+                                                    {novel.ratingCount && novel.ratingCount > 0 ? (
+                                                        <>
+                                                            <Star className="w-3 h-3 fill-amber-500 mr-0.5"/>
+                                                            {(novel.ratingSum! / novel.ratingCount).toFixed(1)}
+                                                        </>
+                                                    ) : (
+                                                        'N/A'
+                                                    )}
+                                                </span>
+                                                <span className="text-slate-300 dark:text-slate-700">•</span>
+                                                <span className="truncate max-w-[80px]">{novel.author}</span>
+                                                <span className="text-slate-300 dark:text-slate-700">•</span>
+                                                <span className="text-[10px] text-primary/80 dark:text-purple-400/80 font-bold bg-primary/5 dark:bg-purple-400/5 px-1.5 py-0.5 rounded">{novel.type}</span>
                                             </div>
                                         </div>
                                     </Link>

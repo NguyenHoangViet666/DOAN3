@@ -146,3 +146,22 @@ body {
   -webkit-backdrop-filter: blur(12px) saturate(180%);
 }
 
+/* 3D Book Cover Effect for Banner */
+.perspective-container {
+  perspective: 1200px;
+}
+.book-3d {
+  transform: rotateY(-18deg) rotateX(6deg) rotateZ(-1deg);
+  transform-style: preserve-3d;
+  box-shadow: 
+    15px 15px 35px rgba(0, 0, 0, 0.6),
+    0px 0px 40px rgba(124, 58, 237, 0.15);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.8s;
+}
+.book-3d:hover {
+  transform: rotateY(-4deg) rotateX(2deg) rotateZ(0deg) scale(1.05) translateY(-10px);
+  box-shadow: 
+    25px 25px 50px rgba(124, 58, 237, 0.3),
+    0px 0px 50px rgba(124, 58, 237, 0.4);
+}
+
